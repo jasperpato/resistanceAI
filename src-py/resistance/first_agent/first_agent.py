@@ -30,6 +30,8 @@ class RandomAgent(Agent):
         self.suspicions = [] # for each player, probability of being a spy
         self.is_spy = False
         self.rounds = [] # stores what occurred in each round in Round objects
+        self.missions_failed = 0
+        self.rounds_complete = 0
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -102,7 +104,18 @@ class RandomAgent(Agent):
         By default, spies will betray 30% of the time. 
         '''
         if self.is_spy():
-            return random()<0.3
+            spies_on_mission = sum(i in mission for i in self.spy_list)
+            spies_required_for_fail = self.fails_required[self.number_of_players][self.rounds_complete+1]
+            
+            if (self.mission_fails == 2 and spies_on_mission >= spies_required_for_fail) or \
+                (self.rounds_complete - self.mission_fails == 2):
+                return True # possible game deciding vote
+            elif spies_on_mission != spies_required_for_fail:
+                return False # more than enough/not enough spies on mission for sabotage
+            else:
+                return True
+        
+        return False # not a spy
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
@@ -115,7 +128,6 @@ class RandomAgent(Agent):
         mission to fail, False otherwise.
         It iss not expected or required for this function to return anything.
         '''
-        #nothing to do here
         pass
 
     def round_outcome(self, rounds_complete, missions_failed):
@@ -124,7 +136,8 @@ class RandomAgent(Agent):
         rounds_complete, the number of rounds (0-5) that have been completed
         missions_failed, the number of missions (0-3) that have failed.
         '''
-        #nothing to do here
+        self.rounds_complete = rounds_complete
+        self.mission_fails = missions_failed
         pass
     
     def game_outcome(self, spies_win, spies):

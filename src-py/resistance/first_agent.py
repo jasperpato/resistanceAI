@@ -57,12 +57,12 @@ class RandomAgent(Agent):
             return [self.player_number] + [s[i] for i in range(team_size-1)]
         else: # team is self + random, non-spy players
             res_list = [p for p in range(self.number_of_players) if p not in self.spy_list]
-            ps = []
-            while len(ps) < team_size-1:
+            team = [self.player_number]
+            while len(team) < team_size:
                 n = randrange(len(res_list))
-                if res_list(n) not in ps:
-                    ps.append(res_list[n])
-            return [self.player_number] + ps
+                if res_list(n) not in team:
+                    team.append(res_list[n])
+            return team
 
     def vote(self, mission, proposer):
         '''

@@ -1,60 +1,88 @@
 from agent import Agent
-import random
+from random import randrange, random
+
+class Round:
+    '''
+    leader: leader of round
+    team: proposed team
+    votes: list of booleans, eg. votes[player_number] = true
+    outcome: true if mission succeeded
+    '''
+    def __init__(self, leader, team, votes, success=False):
+        self.leader = leader
+        self.team = team
+        self.votes = votes
+        y = 0
+        for v in votes:
+            if v:
+                y += 1
+        self.majority = True if y > len(votes) // 2 else False
+        self.success = success
 
 class RandomAgent(Agent):        
-    '''A sample implementation of a random agent in the game The Resistance'''
 
-    def __init__(self, name='Rando'):
-        '''
-        Initialises the agent.
-        Nothing to do here.
-        '''
+    def __init__(self, name='Japer'):
         self.name = name
+        self.number_of_players = 0
+        self.player_number = 0
+        self.spy_list = []
+        self.suspicions = [] # for each player, probability of being a spy
+        self.is_spy = False
+        self.rounds = [] # stores what occurred in each round in Round objects
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
         initialises the game, informing the agent of the 
         number_of_players, the player_number (an id number for the agent in the game),
-        and a list of agent indexes which are the spies, if the agent is a spy, or empty otherwise
+        and a list of agent indexes which are the spies, if the agent is a spy,
+        or empty otherwise
         '''
         self.number_of_players = number_of_players
         self.player_number = player_number
         self.spy_list = spy_list
-
-    def is_spy(self):
-        '''
-        returns True iff the agent is a spy
-        '''
-        return self.player_number in self.spy_list
+        self.is_spy = True if spy_list != [] else False
+        for p in range(number_of_players):
+            self.suspicions.append
+            (1.0 * self.spy_count[number_of_players] / number_of_players)
 
     def propose_mission(self, team_size, betrayals_required = 1):
         '''
-        expects a team_size list of distinct agents with id between 0 (inclusive) and number_of_players (exclusive)
-        to be returned. 
-        betrayals_required are the number of betrayals required for the mission to fail.
+        expects a team_size list of distinct agents with id between 0 (inclusive)
+        and number_of_players (exclusive) to be returned. 
+        betrayals_required are the number of betrayals required for the mission
+        to fail.
         '''
-        team = []
-        while len(team)<team_size:
-            agent = random.randrange(team_size)
-            if agent not in team:
-                team.append(agent)
-        return team        
+        if not self.is_spy: # team is self + least suspicious players
+            s = sorted(self.suspicions).remove(self.player_number)
+            return [self.player_number] + [s[i] for i in range(team_size-1)]
+        else: # team is self + random, non-spy players
+            res_list = [p for p in range(self.number_of_players) if p not in self.spy_list]
+            ps = []
+            while len(ps) < team_size-1:
+                n = randrange(len(res_list))
+                if res_list(n) not in ps:
+                    ps.append(res_list[n])
+            return [self.player_number] + ps
 
     def vote(self, mission, proposer):
         '''
         mission is a list of agents to be sent on a mission. 
         The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the player who proposed the mission.
-        The function should return True if the vote is for the mission, and False if the vote is against the mission.
+        proposer is an int between 0 and number_of_players and is the index of the
+        player who proposed the mission.
+        The function should return True if the vote is for the mission, and False
+        if the vote is against the mission.
         '''
-        return random.random()<0.5
+        return random()<0.5
 
     def vote_outcome(self, mission, proposer, votes):
         '''
         mission is a list of agents to be sent on a mission. 
         The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the player who proposed the mission.
-        votes is a dictionary mapping player indexes to Booleans (True if they voted for the mission, False otherwise).
+        proposer is an int between 0 and number_of_players and is the index of the
+        player who proposed the mission.
+        votes is a dictionary mapping player indexes to Booleans (True if they voted for
+        the mission, False otherwise).
         No return value is required or expected.
         '''
         #nothing to do here
@@ -63,21 +91,26 @@ class RandomAgent(Agent):
     def betray(self, mission, proposer):
         '''
         mission is a list of agents to be sent on a mission. 
-        The agents on the mission are distinct and indexed between 0 and number_of_players, and include this agent.
-        proposer is an int between 0 and number_of_players and is the index of the player who proposed the mission.
-        The method should return True if this agent chooses to betray the mission, and False otherwise. 
+        The agents on the mission are distinct and indexed between 0 and number_of_players,
+        and include this agent.
+        proposer is an int between 0 and number_of_players and is the index of the
+        player who proposed the mission.
+        The method should return True if this agent chooses to betray the mission,
+        and False otherwise. 
         By default, spies will betray 30% of the time. 
         '''
         if self.is_spy():
-            return random.random()<0.3
+            return random()<0.3
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
         mission is a list of agents to be sent on a mission. 
         The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the player who proposed the mission.
+        proposer is an int between 0 and number_of_players and is the index of the
+        player who proposed the mission.
         betrayals is the number of people on the mission who betrayed the mission, 
-        and mission_success is True if there were not enough betrayals to cause the mission to fail, False otherwise.
+        and mission_success is True if there were not enough betrayals to cause the
+        mission to fail, False otherwise.
         It iss not expected or required for this function to return anything.
         '''
         #nothing to do here

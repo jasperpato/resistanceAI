@@ -8,23 +8,23 @@ class Agent:
     #will be conducted via web sockets.
     #e.g. self.mission_size[8][3] is the number to be sent on the 3rd mission in a game of 8
     mission_sizes = {
-            5:[2,3,2,3,3], \
-            6:[3,3,3,3,3], \
-            7:[2,3,3,4,5], \
-            8:[3,4,4,5,5], \
-            9:[3,4,4,5,5], \
-            10:[3,4,4,5,5]
+            5:[2,3,2,3,3], 
+            6:[3,3,3,3,3], 
+            7:[2,3,3,4,5], 
+            8:[3,4,4,5,5], 
+            9:[3,4,4,5,5], 
+            10:[3,4,4,5,5],
             }
     #number of spies for different game sizes
     spy_count = {5:2, 6:2, 7:3, 8:3, 9:3, 10:4} 
     #e.g. self.betrayals_required[8][3] is the number of betrayals required for the 3rd mission in a game of 8 to fail
     fails_required = {
-            5:[1,1,1,1,1], \
-            6:[1,1,1,1,1], \
-            7:[1,1,1,2,1], \
-            8:[1,1,1,2,1], \
-            9:[1,1,1,2,1], \
-            10:[1,1,1,2,1]
+            5:[1,1,1,1,1],
+            6:[1,1,1,1,1],
+            7:[1,1,1,2,1],
+            8:[1,1,1,2,1],
+            9:[1,1,1,2,1],
+            10:[1,1,1,2,1],
             }
 
     def __init__(self, name):

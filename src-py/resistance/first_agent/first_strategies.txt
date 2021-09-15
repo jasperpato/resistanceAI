@@ -1,0 +1,25 @@
+propose_mission {
+    Resistance {
+        - choose self and n least suspicious players
+    }
+    Spy {
+        - choose self and n random, non-spy players
+    }
+}
+vote {
+    Resistance {
+
+    }
+    Spy {
+
+    }
+}
+betray {
+    Resistance {
+
+    }
+    Spy {
+        - if another spy is on the mission do not betray, unless there are already
+          two betrayed missions or two successful missions
+    }
+}

@@ -24,6 +24,7 @@ class RandomAgent(Agent):
     def __init__(self, name='Japer'):
         self.name = name
         self.number_of_players = 0
+        self.players = []
         self.player_number = 0
         self.spy_list = []
         self.suspicions = [] # for each player, probability of being a spy
@@ -38,10 +39,11 @@ class RandomAgent(Agent):
         or empty otherwise
         '''
         self.number_of_players = number_of_players
+        self.players = [p for p in range(number_of_players)]
         self.player_number = player_number
         self.spy_list = spy_list
         self.is_spy = True if spy_list != [] else False
-        for p in range(number_of_players):
+        for p in self.players:
             self.suspicions.append
             (1.0 * self.spy_count[number_of_players] / number_of_players)
 
@@ -56,7 +58,7 @@ class RandomAgent(Agent):
             s = sorted(self.suspicions).remove(self.player_number)
             return [self.player_number] + [s[i] for i in range(team_size-1)]
         else: # team is self + random, non-spy players
-            res_list = [p for p in range(self.number_of_players) if p not in self.spy_list]
+            res_list = [p for p in self.players if p not in self.spy_list]
             team = [self.player_number]
             while len(team) < team_size:
                 n = randrange(len(res_list))

@@ -2,13 +2,13 @@ from agent import Agent
 from random import randrange, random
 
 class Round:
-    '''
-    leader: leader of round
-    team: proposed team
-    votes: list of booleans, eg. votes[player_number] = true
-    outcome: true if mission succeeded
-    '''
     def __init__(self, leader, team, votes, success=False):
+        '''
+        leader: leader of round
+        team: proposed team
+        votes: list of booleans, eg. votes[player_number] = true
+        outcome: true if mission succeeded
+        '''
         self.leader = leader
         self.team = team
         self.votes = votes

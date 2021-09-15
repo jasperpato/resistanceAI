@@ -1,7 +1,11 @@
 from agent import Agent
 from random import randrange, random
 
-class Round:
+class Turn:
+    '''
+    A way of storing all previous game information
+    A turn consists of a team proposition, vote, and, if the vote passed, a mission
+    '''
     def __init__(self, leader, team, votes, success=False):
         '''
         leader: leader of round
@@ -19,7 +23,7 @@ class Round:
         self.majority = True if y > len(votes) // 2 else False
         self.success = success
 
-class RandomAgent(Agent):        
+class FirstAgent(Agent):        
 
     def __init__(self, name='Japer'):
         self.name = name

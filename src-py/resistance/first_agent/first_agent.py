@@ -106,8 +106,8 @@ class FirstAgent(Agent):
 
     def vote(self, mission, proposer):
         if(self.rounds_completed() == 0):
-            return True
-        
+            return True # always vote yes on first round
+        return random() < 0.75   
 
     def vote_outcome(self, mission, proposer, votes):
         self.turns.append(Turn(proposer, mission, votes))
@@ -136,7 +136,7 @@ class FirstAgent(Agent):
     
     def game_outcome(self, spies_win, spies):
         '''
-        unnecessary
+        unnecessary - do not store info between games (yet)
         '''
         pass
 

@@ -94,12 +94,11 @@ class FirstAgent(Agent):
         if not self.is_spy: # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
         elif self.fails_required() == 1: # team is self + random, non-spy players
-            res_list = [p for p in self.players if p not in self.spy_list]
             team = [self.player_number]
             while len(team) < team_size:
-                n = randrange(len(res_list))
-                if res_list[n] not in team:
-                    team.append(res_list[n])
+                n = randrange(self.players)
+                if self.players[n]not in self.spy_list and self.players[n] not in team:
+                    team.append(self.players[n])
             return team
         else: # team is self + random players
             team = [self.player_number]

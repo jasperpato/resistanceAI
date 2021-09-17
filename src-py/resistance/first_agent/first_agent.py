@@ -11,7 +11,7 @@ class Turn:
         leader: leader of round
         team: proposed team
         votes: list of booleans, eg. votes[player_number] = True
-        outcome: true if mission succeeded
+        outcome: True if mission succeeded
         '''
         self.proposer = proposer
         self.team = team
@@ -19,14 +19,14 @@ class Turn:
         self.betrayals = None
         self.success = None
 
-    def majority(self):
+    def is_majority(self):
         y = 0
         for v in self.votes:
             if v:
                 y += 1
         return True if y > len(self.votes) // 2 else False
 
-    def completed(self):
+    def is_completed(self):
         return self.success is not None
 
 class FirstAgent(Agent):        
@@ -44,14 +44,14 @@ class FirstAgent(Agent):
     def missions_failed(self):
         f = 0
         for t in self.turns:
-            if t.completed() and not t.success:
+            if t.is_completed() and not t.success:
                 f += 1
         return f
 
     def missions_succeeded(self):
         s = 0
         for t in self.turns:
-            if t.completed() and t.success:
+            if t.is_completed() and t.success:
                 s += 1
         return s
 

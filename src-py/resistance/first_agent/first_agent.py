@@ -10,7 +10,7 @@ class Turn:
         '''
         leader: leader of round
         team: proposed team
-        votes: list of booleans, eg. votes[player_number] = true
+        votes: list of booleans, eg. votes[player_number] = True
         outcome: true if mission succeeded
         '''
         self.proposer = proposer
@@ -22,7 +22,8 @@ class Turn:
     def majority(self):
         y = 0
         for v in self.votes:
-            y += 1 if v else y
+            if v:
+                y += 1
         return True if y > len(self.votes) // 2 else False
 
     def completed(self):

@@ -58,9 +58,12 @@ class FirstAgent(Agent):
     def rounds_completed(self):
         r = 0
         for t in self.turns:
-            if t.completed():
+            if t.is_completed():
                 r += 1
         return r
+
+    def fails_required(self):
+        return self.fails_required[self.number_of_players][self.rounds_completed()+1]
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -96,13 +99,20 @@ class FirstAgent(Agent):
         '''
         if not self.is_spy: # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
-        else: # team is self + random, non-spy players
+        elif self.fails_required() == 1: # team is self + random, non-spy players
             res_list = [p for p in self.players if p not in self.spy_list]
             team = [self.player_number]
             while len(team) < team_size:
                 n = randrange(len(res_list))
-                if res_list(n) not in team:
+                if res_list[n] not in team:
                     team.append(res_list[n])
+            return team
+        else: # team is self + random players
+            team = [self.player_number]
+            while len(team) < team_size:
+                n = randrange(len(self.players))
+                if self.players[n] not in team:
+                    team.append(self.players[n])
             return team
 
     def vote(self, mission, proposer):
@@ -116,10 +126,9 @@ class FirstAgent(Agent):
     def betray(self, mission, proposer):
         if self.is_spy():
             spies_on_mission = len([i for i in self.spy_list if i in mission])
-            fails_required = self.fails_required[self.number_of_players][self.rounds_completed()+1]
             if (self.rounds_completed() == 4):
                 return True # must betray on the final, game-deciding vote
-            elif spies_on_mission != fails_required:
+            elif spies_on_mission != self.fails_required():
                 return False # either too many or not enough spies on the mission to sabotage
             else:
                 return random() < 0.3 # betray 30% of the time

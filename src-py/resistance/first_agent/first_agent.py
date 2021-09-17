@@ -61,10 +61,7 @@ class FirstAgent(Agent):
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
-        initialises the game, informing the agent of the 
-        number_of_players, the player_number (an id number for the agent in the game),
-        and a list of agent indexes which are the spies, if the agent is a spy,
-        or empty otherwise
+        initialises the game, spy_list is empty if player is not a spy
         '''
         self.number_of_players = number_of_players
         self.players = [p for p in range(number_of_players)]
@@ -85,12 +82,6 @@ class FirstAgent(Agent):
         return [i[0] for i in s][:n]
 
     def propose_mission(self, team_size, betrayals_required = 1):
-        '''
-        expects a team_size list of distinct agents with id between 0 (inclusive)
-        and number_of_players (exclusive) to be returned. 
-        betrayals_required are the number of betrayals required for the mission
-        to fail.
-        '''
         if not self.is_spy: # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
         elif self.fails_required() == 1: # team is self + random, non-spy players
@@ -114,20 +105,26 @@ class FirstAgent(Agent):
         return random() < 0.75   
 
     def vote_outcome(self, mission, proposer, votes):
+        '''
+        add a new Turn object to our stored info
+        '''
         self.turns.append(Turn(proposer, mission, votes))
 
     def betray(self, mission, proposer):
         if self.is_spy():
-            spies_on_mission = len([i for i in self.spy_list if i in mission])
+            number_of_spies_on_mission = len([i for i in self.spy_list if i in mission])
             if (self.rounds_completed() == 4):
                 return True # must betray on the final, game-deciding vote
-            elif spies_on_mission != self.fails_required():
+            elif number_of_spies_on_mission != self.fails_required():
                 return False # either too many or not enough spies on the mission to sabotage
             else:
                 return random() < 0.3 # betray 30% of the time
         return False # is resistance member
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
+        '''
+        update the last Turn object with mission info
+        '''
         self.turns[-1].betrayals = betrayals
         self.turns[-1].success = mission_success
 

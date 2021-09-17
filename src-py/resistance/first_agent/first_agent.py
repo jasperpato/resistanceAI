@@ -7,17 +7,11 @@ class Turn:
                       or: [team proposition + vote + outcome]   (majority)
     '''
     def __init__(self, proposer, team, votes):
-        '''
-        leader: leader of round
-        team: proposed team
-        votes: list of booleans, eg. votes[player_number] = True
-        outcome: True if mission succeeded
-        '''
         self.proposer = proposer
-        self.team = team
-        self.votes = votes
-        self.betrayals = None
-        self.success = None
+        self.team = team # list of players proposed
+        self.votes = votes # dictionary mapping players to boolean vote
+        self.betrayals = None # number of betrayals or None if no mission carried out
+        self.success = None # True iff mission succeeded, None if no mission carried out
 
     def is_majority(self):
         y = 0

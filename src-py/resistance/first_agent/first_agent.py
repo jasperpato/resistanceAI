@@ -3,25 +3,30 @@ from random import randrange, random
 
 class Turn:
     '''
-    A way of storing all previous game information
-    A turn consists of a team proposition, vote, and, if the vote passed, a mission
+    A turn can be either: [team proposition + vote]             (not majority)
+                      or: [team proposition + vote + outcome]   (majority)
     '''
-    def __init__(self, leader, team, votes, success=False):
+    def __init__(self, proposer, team, votes):
         '''
         leader: leader of round
         team: proposed team
         votes: list of booleans, eg. votes[player_number] = true
         outcome: true if mission succeeded
         '''
-        self.leader = leader
+        self.proposer = proposer
         self.team = team
         self.votes = votes
+        self.betrayals = None
+        self.success = None
+
+    def majority(self):
         y = 0
-        for v in votes:
-            if v:
-                y += 1
-        self.majority = True if y > len(votes) // 2 else False
-        self.success = success
+        for v in self.votes:
+            y += 1 if v else y
+        return True if y > len(self.votes) // 2 else False
+
+    def completed(self):
+        return self.success is not None
 
 class FirstAgent(Agent):        
 
@@ -31,11 +36,30 @@ class FirstAgent(Agent):
         self.players = []
         self.player_number = 0
         self.spy_list = []
-        self.suspicions = [] # for each player, probability of being a spy
+        self.suspicions = {} # for each player, probability of being a spy
         self.is_spy = False
-        self.rounds = [] # stores what occurred in each round in Round objects
-        self.missions_failed = 0
-        self.rounds_complete = 0
+        self.turns = [] # stores all turn information
+
+    def missions_failed(self):
+        f = 0
+        for t in self.turns:
+            if t.completed() and not t.success:
+                f += 1
+        return f
+
+    def missions_succeeded(self):
+        s = 0
+        for t in self.turns:
+            if t.completed() and t.success:
+                s += 1
+        return s
+
+    def rounds_completed(self):
+        r = 0
+        for t in self.turns:
+            if t.completed():
+                r += 1
+        return r
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -50,8 +74,17 @@ class FirstAgent(Agent):
         self.spy_list = spy_list
         self.is_spy = True if spy_list != [] else False
         for p in self.players:
-            self.suspicions.append
-            (1.0 * self.spy_count[number_of_players] / number_of_players)
+            self.suspicions[p] = self.spy_count[number_of_players] / number_of_players
+        self.turns = []
+
+    def least_suspicious(self, n):
+        '''
+        returns the n least suspicious players, not including self
+        '''
+        d = self.suspicions.copy()
+        d.pop(self.player_number)
+        s = sorted(d.items(), key=lambda x: x[1])
+        return [i[0] for i in s][:n]
 
     def propose_mission(self, team_size, betrayals_required = 1):
         '''
@@ -61,8 +94,7 @@ class FirstAgent(Agent):
         to fail.
         '''
         if not self.is_spy: # team is self + least suspicious players
-            s = sorted(self.suspicions).remove(self.player_number)
-            return [self.player_number] + [s[i] for i in range(team_size-1)]
+            return [self.player_number] + self.least_suspicious(team_size-1)
         else: # team is self + random, non-spy players
             res_list = [p for p in self.players if p not in self.spy_list]
             team = [self.player_number]
@@ -73,84 +105,39 @@ class FirstAgent(Agent):
             return team
 
     def vote(self, mission, proposer):
-        '''
-        mission is a list of agents to be sent on a mission. 
-        The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the
-        player who proposed the mission.
-        The function should return True if the vote is for the mission, and False
-        if the vote is against the mission.
-        '''
-        return random()<0.5
+        if(self.rounds_completed() == 0):
+            return True
+        
 
     def vote_outcome(self, mission, proposer, votes):
-        '''
-        mission is a list of agents to be sent on a mission. 
-        The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the
-        player who proposed the mission.
-        votes is a dictionary mapping player indexes to Booleans (True if they voted for
-        the mission, False otherwise).
-        No return value is required or expected.
-        '''
-        #nothing to do here
-        pass
+        self.turns.append(Turn(proposer, mission, votes))
 
     def betray(self, mission, proposer):
-        '''
-        mission is a list of agents to be sent on a mission. 
-        The agents on the mission are distinct and indexed between 0 and number_of_players,
-        and include this agent.
-        proposer is an int between 0 and number_of_players and is the index of the
-        player who proposed the mission.
-        The method should return True if this agent chooses to betray the mission,
-        and False otherwise. 
-        By default, spies will betray 30% of the time. 
-        '''
         if self.is_spy():
-            spies_on_mission = sum(i in mission for i in self.spy_list)
-            spies_required_for_fail = self.fails_required[self.number_of_players][self.rounds_complete+1]
-            
-            if (self.mission_fails == 2 and spies_on_mission >= spies_required_for_fail) or \
-                (self.rounds_complete - self.mission_fails == 2):
-                return True # possible game deciding vote
-            elif spies_on_mission != spies_required_for_fail:
-                return False # more than enough/not enough spies on mission for sabotage
+            spies_on_mission = len([i for i in self.spy_list if i in mission])
+            fails_required = self.fails_required[self.number_of_players][self.rounds_completed()+1]
+            if (self.rounds_completed() == 4):
+                return True # must betray on the final, game-deciding vote
+            elif spies_on_mission != fails_required:
+                return False # either too many or not enough spies on the mission to sabotage
             else:
-                return True
-        
-        return False # not a spy
+                return random() < 0.3 # betray 30% of the time
+        return False # is resistance member
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
-        '''
-        mission is a list of agents to be sent on a mission. 
-        The agents on the mission are distinct and indexed between 0 and number_of_players.
-        proposer is an int between 0 and number_of_players and is the index of the
-        player who proposed the mission.
-        betrayals is the number of people on the mission who betrayed the mission, 
-        and mission_success is True if there were not enough betrayals to cause the
-        mission to fail, False otherwise.
-        It iss not expected or required for this function to return anything.
-        '''
-        pass
+        self.turns[-1].betrayals = betrayals
+        self.turns[-1].success = mission_success
 
     def round_outcome(self, rounds_complete, missions_failed):
         '''
-        basic informative function, where the parameters indicate:
-        rounds_complete, the number of rounds (0-5) that have been completed
-        missions_failed, the number of missions (0-3) that have failed.
+        unnecessary - can infer this information
         '''
-        self.rounds_complete = rounds_complete
-        self.mission_fails = missions_failed
         pass
     
     def game_outcome(self, spies_win, spies):
         '''
-        basic informative function, where the parameters indicate:
-        spies_win, True iff the spies caused 3+ missions to fail
-        spies, a list of the player indexes for the spies.
+        unnecessary
         '''
-        #nothing to do here
         pass
 
 

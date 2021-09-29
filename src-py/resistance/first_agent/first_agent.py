@@ -74,6 +74,7 @@ class FirstAgent(Agent):
 
     def least_suspicious(self, n):
         '''
+        Resistance method
         returns the n least suspicious players, not including self
         '''
         d = self.suspicions.copy()
@@ -81,14 +82,28 @@ class FirstAgent(Agent):
         s = sorted(d.items(), key=lambda x: x[1])
         return [i[0] for i in s][:n]
 
+    def least_suspicious_spies(self, n):
+        '''
+        Spy method
+        returns the n least suspicious spies, not including self
+        '''
+        return [i[0] for i in self.least_suspicious(self.number_of_players) if i in self.spy_list][:n]
+
     def propose_mission(self, team_size, betrayals_required = 1):
         if not self.is_spy: # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
-        elif self.fails_required() == 1: # team is self + random, non-spy players
+        elif betrayals_required == 1: # team is self + random, non-spies
             team = [self.player_number]
             while len(team) < team_size:
                 n = randrange(self.players)
-                if self.players[n]not in self.spy_list and self.players[n] not in team:
+                if self.players[n] not in self.spy_list and self.players[n] not in team:
+                    team.append(self.players[n])
+            return team
+        elif betrayals_required == 2: # team is self + most suspicious spy + random, non-spies
+            team = [self.player_number, max(self.spy_list, key=lambda x: self.suspicions[x])]
+            while len(team) < team_size:
+                n = randrange(self.players)
+                if self.players[n] not in self.spy_list and self.players[n] not in team:
                     team.append(self.players[n])
             return team
         else: # team is self + random players
@@ -113,13 +128,13 @@ class FirstAgent(Agent):
     def betray(self, mission, proposer):
         if self.is_spy():
             number_of_spies_on_mission = len([i for i in self.spy_list if i in mission])
-            if (self.rounds_completed() == 4):
-                return True # must betray on the final, game-deciding vote
+            if (self.missions_succeeded() == 2):
+                return True # must betray to avoid losing
             elif number_of_spies_on_mission != self.fails_required():
                 return False # either too many or not enough spies on the mission to sabotage
             else:
                 return random() < 0.3 # betray 30% of the time
-        return False # is resistance member
+        return False # is resistance
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
@@ -136,7 +151,7 @@ class FirstAgent(Agent):
     
     def game_outcome(self, spies_win, spies):
         '''
-        unnecessary - do not store info between games (yet)
+        unnecessary - do not store info between games (yet...)
         '''
         pass
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Start</title>
+    </head>
+    <body>
+        <form>
+            <p>
+                <label for="players">Number of players: </label>
+                <input type="number" name="players" min="5" max="10"><br>
+                <label for="number">My player number: </label>
+                <input type="number" name="number" min="0" max="9"><br>
+                Who are the spies? <br>
+                <span id="spies">
+                <script>
+                    for(var i = 0; i < 10; ++i) {
+                        document.getElementById("spies").innerHTML +=
+                        '<label for="'+i+'">'+i+' </label>\
+                         <input type="checkbox" name="'+i+'"><br>';
+                    }
+                </script>
+                </span>
+                <input type="submit">
+            </p>
+        </form>
+    </body>
+</html>

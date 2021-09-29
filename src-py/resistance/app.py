@@ -1,14 +1,21 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
+from first_agent import FirstAgent
 
 app = Flask("Resistance")
+agent = FirstAgent()
 turn = 0
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def main():
+    if(request.method == "POST"):
+        number_of_players = request.form["players"]
+        
+
     return render_template("index.html")
 
-@app.route("/turn", methods=["get", "post"])
+@app.route("/propose", methods=["GET", "POST"])
 def turn():
-    return render_template("turn.html")
+    return render_template("propose.html")
 
-app.run(host="0.0.0.0", debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)

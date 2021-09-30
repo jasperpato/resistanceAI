@@ -56,6 +56,9 @@ class FirstAgent(Agent):
                 r += 1
         return r
 
+    def round(self):
+        return self.rounds_completed()-1
+
     def fails_required(self):
         return self.fails_required[self.number_of_players][self.rounds_completed()+1]
 

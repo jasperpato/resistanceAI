@@ -61,7 +61,7 @@ class FirstAgent(Agent):
         return self.rounds_completed()+1
 
     def fails_required(self):
-        return self.fails_required[self.number_of_players][self.rounds_completed()+1]
+        return self.fails_required[self.number_of_players][self.round()]
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -103,8 +103,8 @@ class FirstAgent(Agent):
                 if self.players[n] not in self.spy_list and self.players[n] not in team:
                     team.append(self.players[n])
             return team
-        elif betrayals_required == 2: # team is self + most suspicious spy + random, non-spies
-            team = [self.player_number, max(self.spy_list, key=lambda x: self.suspicions[x])]
+        elif betrayals_required == 2: # team is self + least suspicious spy + random, non-spies
+            team = [self.player_number, self.least_suspicious_spies(1)]
             while len(team) < team_size:
                 n = randrange(self.players)
                 if self.players[n] not in self.spy_list and self.players[n] not in team:
@@ -119,7 +119,7 @@ class FirstAgent(Agent):
             return team
 
     def vote(self, mission, proposer):
-        if(self.rounds_completed() == 0):
+        if(self.round() == 1):
             return True # always vote yes on first round
         return random() < 0.75   
 

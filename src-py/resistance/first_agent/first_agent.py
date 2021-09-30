@@ -6,7 +6,8 @@ class Turn:
     A turn can be either: [team proposition + vote]             (not majority)
                       or: [team proposition + vote + outcome]   (majority)
     '''
-    def __init__(self, proposer, team, votes):
+    def __init__(self, round, proposer, team, votes):
+        self.round = round
         self.proposer = proposer
         self.team = team # list of players proposed
         self.votes = votes # dictionary mapping players to boolean vote
@@ -57,7 +58,7 @@ class FirstAgent(Agent):
         return r
 
     def round(self):
-        return self.rounds_completed()-1
+        return self.rounds_completed()+1
 
     def fails_required(self):
         return self.fails_required[self.number_of_players][self.rounds_completed()+1]
@@ -126,7 +127,7 @@ class FirstAgent(Agent):
         '''
         add a new Turn object to our stored info
         '''
-        self.turns.append(Turn(proposer, mission, votes))
+        self.turns.append(Turn(self.round(), proposer, mission, votes))
 
     def betray(self, mission, proposer):
         if self.is_spy():
@@ -136,7 +137,7 @@ class FirstAgent(Agent):
             elif number_of_spies_on_mission != self.fails_required():
                 return False # either too many or not enough spies on the mission to sabotage
             else:
-                return random() < 0.3 # betray 30% of the time
+                return random() < 0.2 * self.round() # betray more later in game
         return False # is resistance
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):

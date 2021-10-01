@@ -1,10 +1,10 @@
 from agent import Agent
 from random import randrange, random
 
-class Turn:
+class Mission:
     '''
-    A turn can be either: [team proposition + vote]             (not majority)
-                      or: [team proposition + vote + outcome]   (majority)
+    A Mission can be either: [team proposition + vote]             (aborted)
+                         or: [team proposition + vote + outcome]   (carried out)
     '''
     def __init__(self, round, proposer, team, votes):
         self.round = round
@@ -14,14 +14,7 @@ class Turn:
         self.betrayals = None # number of betrayals or None if no mission carried out
         self.success = None # True iff mission succeeded, None if no mission carried out
 
-    def is_majority(self):
-        y = 0
-        for v in self.votes:
-            if v:
-                y += 1
-        return True if y > len(self.votes) // 2 else False
-
-    def is_completed(self):
+    def carried_out(self):
         return self.success is not None
 
 class FirstAgent(Agent):        
@@ -34,26 +27,26 @@ class FirstAgent(Agent):
         self.spy_list = []
         self.suspicions = {} # for each player, probability of being a spy
         self.is_spy = False
-        self.turns = [] # stores all turn information
+        self.missions = [] # stores all game history
 
     def missions_failed(self):
         f = 0
-        for t in self.turns:
-            if t.is_completed() and not t.success:
+        for m in self.missions:
+            if m.carried_out() and not m.success:
                 f += 1
         return f
 
     def missions_succeeded(self):
         s = 0
-        for t in self.turns:
-            if t.is_completed() and t.success:
+        for m in self.missions:
+            if m.carried_out() and m.success:
                 s += 1
         return s
 
     def rounds_completed(self):
         r = 0
-        for t in self.turns:
-            if t.is_completed():
+        for m in self.missions:
+            if m.carried_out():
                 r += 1
         return r
 
@@ -74,7 +67,7 @@ class FirstAgent(Agent):
         self.is_spy = True if spy_list != [] else False
         for p in self.players:
             self.suspicions[p] = self.spy_count[number_of_players] / number_of_players
-        self.turns = []
+        self.missions = []
 
     def least_suspicious(self, n):
         '''
@@ -93,17 +86,24 @@ class FirstAgent(Agent):
         '''
         return [i[0] for i in self.least_suspicious(self.number_of_players) if i in self.spy_list][:n]
 
+    def most_suspicious_resistance(self, n):
+        '''
+        Spy method
+        returns the n most suspicious resistance members, not including self
+        '''
+        pass
+
     def propose_mission(self, team_size, betrayals_required = 1):
         if not self.is_spy: # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
-        elif betrayals_required == 1: # team is self + random, non-spies
+        elif betrayals_required == 1: # team is self + random, non-spies (change to most suspicious resistance..?)
             team = [self.player_number]
             while len(team) < team_size:
                 n = randrange(self.players)
                 if self.players[n] not in self.spy_list and self.players[n] not in team:
                     team.append(self.players[n])
             return team
-        elif betrayals_required == 2: # team is self + least suspicious spy + random, non-spies
+        elif betrayals_required == 2: # team is self + least suspicious spy + random, non-spies (change again..?)
             team = [self.player_number, self.least_suspicious_spies(1)]
             while len(team) < team_size:
                 n = randrange(self.players)
@@ -125,9 +125,9 @@ class FirstAgent(Agent):
 
     def vote_outcome(self, mission, proposer, votes):
         '''
-        add a new Turn object to our stored info
+        add a new Mission object to our stored info
         '''
-        self.turns.append(Turn(self.round(), proposer, mission, votes))
+        self.missions.append(Mission(self.round(), proposer, mission, votes))
 
     def betray(self, mission, proposer):
         if self.is_spy():
@@ -142,10 +142,10 @@ class FirstAgent(Agent):
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
-        update the last Turn object with mission info
+        update the last Mission object with mission info
         '''
-        self.turns[-1].betrayals = betrayals
-        self.turns[-1].success = mission_success
+        self.missions[-1].betrayals = betrayals
+        self.missions[-1].success = mission_success
 
     def round_outcome(self, rounds_complete, missions_failed):
         '''

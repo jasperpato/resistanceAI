@@ -1,7 +1,7 @@
 import unittest
-import first_agent
+import baseline
 
-class TestFirst(unittest.TestCase):
+class TestBaseline(unittest.TestCase):
     def setUp(self):
         pass
 

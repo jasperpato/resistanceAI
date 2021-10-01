@@ -1,6 +1,4 @@
 from agent import Agent
-from random_agent import RandomAgent
-from first_agent.first_agent import FirstAgent
 import random
 
 class Game:

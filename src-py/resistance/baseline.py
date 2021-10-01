@@ -1,5 +1,5 @@
 from agent import Agent
-from random import randrange, random
+from random import random
 
 class Mission:
     '''
@@ -17,7 +17,7 @@ class Mission:
 
     def carried_out(self): return self.success is not None
 
-class FirstAgent(Agent):        
+class BaselineAgent(Agent):        
 
     def __init__(self, name='Japer'):
         self.name = name

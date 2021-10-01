@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
-from first_agent.first_agent import FirstAgent
+from baseline import BaselineAgent
 
 app = Flask("Resistance")
-agent = FirstAgent()
+agent = BaselineAgent()
 
 @app.route("/", methods=["GET", "POST"])
 def main():

@@ -1,4 +1,5 @@
 from agent import Agent
+from human import HumanAgent
 import random
 
 class Game:
@@ -9,7 +10,7 @@ class Game:
     to share information and get game actions
     '''
 
-    def __init__(self, agents):
+    def __init__(self, agents, print=False):
         '''
         agents is the list of agents playing the game
         the list must contain 5-10 agents
@@ -27,6 +28,7 @@ class Game:
         self.num_players = len(agents)
         #allocate spies
         self.spies = []
+        self.humans = []
         while len(self.spies) < Agent.spy_count[self.num_players]:
             spy = random.randrange(self.num_players)
             if spy not in self.spies:
@@ -35,14 +37,20 @@ class Game:
         for agent_id in range(self.num_players):
             spy_list = self.spies.copy() if agent_id in self.spies else []
             self.agents[agent_id].new_game(self.num_players,agent_id, spy_list)
+            if isinstance(self.agents[agent_id], HumanAgent): self.humans.append(agent_id)
         #initialise rounds
         self.missions_lost = 0
         self.rounds = []
-        '''
-        print(f"Number of players: {self.num_players}")
-        print(f"Spies: {sorted(self.spies)}")
-        print(f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}")
-        '''
+        self.print = print
+        if self.print:
+            print(f"Number of players: {self.num_players}")
+            print(f"Humans: {self.humans}, AIs:\
+            {[i for i in range(self.num_players) if i not in self.humans]}")
+            input("Press enter to view teams.")
+            print(f"Spies: {sorted(self.spies)}, Resistance:\
+            {sorted([i for i in range(self.num_players) if i not in self.spies])}")
+            input("Press enter to hide teams.")
+            # hide teams
 
     def play(self):
         leader_id = 0

@@ -5,7 +5,9 @@ class HumanAgent(Agent):
     A human agent.
     Actions must be input on the command line.
     '''
-    def __init__(self, name="Human"): self.name = name
+    def __init__(self, name="Human"):
+        self.name = name
+        self.number_of_players = 0
 
     def __str__(self): return 'Agent '+self.name
 
@@ -15,19 +17,17 @@ class HumanAgent(Agent):
         self.number_of_players = number_of_players
 
     def propose_mission(self, team_size, fails_required = 1):
-        i = input(f"Propose a team of {team_size}.\nInput player numbers separated by spaces: ")
+        i = input(f"\nPropose a team of {team_size}.\nInput player numbers separated by spaces: ")
         team = []
         for j in i.split():
             if j == '': continue
             try:
                 n = int(j)
-                if n < 0 or n >= self.number_of_players:
-                    self.propose_mission(team_size, fails_required)
-                    return
+                if n < 0 or n >= self.number_of_players or n in team:
+                    return self.propose_mission(team_size, fails_required)
                 team.append(n)
             except:
-                self.propose_mission(team_size, fails_required)
-                return
+                return self.propose_mission(team_size, fails_required)
         return team
                 
     def vote(self, mission, proposer):
@@ -37,10 +37,10 @@ class HumanAgent(Agent):
         proposer is an int between 0 and number_of_players and is the index of the player who proposed the mission.
         The function should return True if the vote is for the mission, and False if the vote is against the mission.
         '''
-        i = input(f"Vote for leader: {proposer}, team: {mission}?\nInput y or n: ")
+        i = input(f"\nVote for leader: {proposer}, team: {mission}?\nInput y or n: ")
         if i == 'y': return True
         elif i == 'n': return False
-        self.vote(mission, proposer)
+        return self.vote(mission, proposer)
 
     def vote_outcome(self, mission, proposer, votes):
         '''
@@ -60,10 +60,10 @@ class HumanAgent(Agent):
         The method should return True if this agent chooses to betray the mission, and False otherwise. 
         Only spies are permitted to betray the mission. 
         '''
-        i = input(f"Betray leader: {proposer}, team: {mission}?\nInput y or n: ")
+        i = input(f"\nBetray leader: {proposer}, team: {mission}?\nInput y or n: ")
         if i == 'y': return True
         elif i == 'n': return False
-        self.betray(mission, proposer)
+        return self.betray(mission, proposer)
 
     def mission_outcome(self, mission, proposer, num_fails, mission_success):
         '''

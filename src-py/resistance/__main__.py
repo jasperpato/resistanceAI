@@ -1,7 +1,8 @@
-from random_agent import RandomAgent
-from game import Game
+from random_agent import *
+from human import *
+from game import *
 
-agents = [RandomAgent(name='r1'), 
+agents = [HumanAgent(name='r1'), 
         RandomAgent(name='r2'),  
         RandomAgent(name='r3'),  
         RandomAgent(name='r4'),  

@@ -1,6 +1,8 @@
 from game import *
 from random_agent import *
 from baseline import *
+from human import *
+from random import randrange
 
 '''
 Simulate games and print aggregates

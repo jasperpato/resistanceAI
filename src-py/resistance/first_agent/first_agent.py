@@ -26,8 +26,10 @@ class FirstAgent(Agent):
         self.player_number = 0
         self.spy_list = []
         self.suspicions = {} # for each player, probability of being a spy
-        self.is_spy = False
         self.missions = [] # stores all game history
+
+    def is_spy(self):
+        return self.spy_list != []
 
     def missions_failed(self):
         f = 0
@@ -64,7 +66,6 @@ class FirstAgent(Agent):
         self.players = [p for p in range(number_of_players)]
         self.player_number = player_number
         self.spy_list = spy_list
-        self.is_spy = True if spy_list != [] else False
         for p in self.players:
             self.suspicions[p] = self.spy_count[number_of_players] / number_of_players
         self.missions = []
@@ -84,44 +85,30 @@ class FirstAgent(Agent):
         Spy method
         returns the n least suspicious spies, not including self
         '''
-        return [i[0] for i in self.least_suspicious(self.number_of_players) if i in self.spy_list][:n]
+        return [i[0] for i in self.least_suspicious(self.number_of_players)
+        if i in self.spy_list][:n]
 
     def most_suspicious_resistance(self, n):
         '''
         Spy method
-        returns the n most suspicious resistance members, not including self
+        returns the n most suspicious resistance members
         '''
-        pass
+        return [i[0] for i in self.least_suspicious(self.number_of_players).reverse()
+        if i not in self.spy_list][:n]
 
     def propose_mission(self, team_size, betrayals_required = 1):
-        if not self.is_spy: # team is self + least suspicious players
+        if not self.is_spy(): # team is self + least suspicious players
             return [self.player_number] + self.least_suspicious(team_size-1)
-        elif betrayals_required == 1: # team is self + random, non-spies (change to most suspicious resistance..?)
-            team = [self.player_number]
-            while len(team) < team_size:
-                n = randrange(self.players)
-                if self.players[n] not in self.spy_list and self.players[n] not in team:
-                    team.append(self.players[n])
-            return team
-        elif betrayals_required == 2: # team is self + least suspicious spy + random, non-spies (change again..?)
-            team = [self.player_number, self.least_suspicious_spies(1)]
-            while len(team) < team_size:
-                n = randrange(self.players)
-                if self.players[n] not in self.spy_list and self.players[n] not in team:
-                    team.append(self.players[n])
-            return team
-        else: # team is self + random players
-            team = [self.player_number]
-            while len(team) < team_size:
-                n = randrange(len(self.players))
-                if self.players[n] not in team:
-                    team.append(self.players[n])
-            return team
+        elif betrayals_required == 1: # team is self + most suspicious resistance
+            return [self.player_number] + self.most_suspicious_resistance(team_size-1)    
+        elif betrayals_required == 2: # team is self + least suspicious spy + most suspicious resistance
+            return [self.player_number, self.least_suspicious_spies(1)] + \
+                    self.most_suspicious_resistance(team_size-2)
 
     def vote(self, mission, proposer):
-        if(self.round() == 1):
-            return True # always vote yes on first round
-        return random() < 0.75   
+        if(self.round() == 1 or proposer == self.player_number):
+            return True
+        return random() < 0.5  
 
     def vote_outcome(self, mission, proposer, votes):
         '''

@@ -3,8 +3,9 @@ from random import randrange, random
 
 class Mission:
     '''
-    A Mission can be either: [team proposition + vote]             (aborted)
-                         or: [team proposition + vote + outcome]   (carried out)
+    Stores game history.
+    A Mission is either: [team proposition + vote]             (aborted)
+                     or: [team proposition + vote + outcome]   (carried out)
     '''
     def __init__(self, round, proposer, team, votes):
         self.round = round
@@ -14,8 +15,7 @@ class Mission:
         self.betrayals = None # number of betrayals or None if no mission carried out
         self.success = None # True iff mission succeeded, None if no mission carried out
 
-    def carried_out(self):
-        return self.success is not None
+    def carried_out(self): return self.success is not None
 
 class FirstAgent(Agent):        
 
@@ -28,35 +28,30 @@ class FirstAgent(Agent):
         self.suspicions = {} # for each player, probability of being a spy
         self.missions = [] # stores all game history
 
-    def is_spy(self):
-        return self.spy_list != []
+    def is_spy(self): return self.spy_list != []
 
     def missions_failed(self):
         f = 0
         for m in self.missions:
-            if m.carried_out() and not m.success:
-                f += 1
+            if m.carried_out() and not m.success: f += 1
         return f
 
     def missions_succeeded(self):
         s = 0
         for m in self.missions:
-            if m.carried_out() and m.success:
-                s += 1
+            if m.carried_out() and m.success: s += 1
         return s
 
     def rounds_completed(self):
         r = 0
         for m in self.missions:
-            if m.carried_out():
-                r += 1
+            if m.carried_out(): r += 1
         return r
 
-    def round(self):
-        return self.rounds_completed()+1
+    def round(self): return self.rounds_completed()+1
 
-    def fails_required(self):
-        return self.fails_required[self.number_of_players][self.round()]
+    def betrayals_required(self):
+        return self.fails_required[self.number_of_players][self.rounds_completed()]
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -85,7 +80,7 @@ class FirstAgent(Agent):
         Spy method
         returns the n least suspicious spies, not including self
         '''
-        return [i[0] for i in self.least_suspicious(self.number_of_players)
+        return [i for i in self.least_suspicious(self.number_of_players)
         if i in self.spy_list][:n]
 
     def most_suspicious_resistance(self, n):
@@ -93,7 +88,7 @@ class FirstAgent(Agent):
         Spy method
         returns the n most suspicious resistance members
         '''
-        return [i[0] for i in self.least_suspicious(self.number_of_players).reverse()
+        return [i for i in self.least_suspicious(self.number_of_players)[::-1]
         if i not in self.spy_list][:n]
 
     def propose_mission(self, team_size, betrayals_required = 1):
@@ -106,8 +101,7 @@ class FirstAgent(Agent):
                     self.most_suspicious_resistance(team_size-2)
 
     def vote(self, mission, proposer):
-        if(self.round() == 1 or proposer == self.player_number):
-            return True
+        if(self.round() == 1 or proposer == self.player_number): return True
         return random() < 0.5  
 
     def vote_outcome(self, mission, proposer, votes):
@@ -121,7 +115,7 @@ class FirstAgent(Agent):
             number_of_spies_on_mission = len([i for i in self.spy_list if i in mission])
             if (self.missions_succeeded() == 2):
                 return True # must betray to avoid losing
-            elif number_of_spies_on_mission != self.fails_required():
+            elif number_of_spies_on_mission != self.betrayals_required():
                 return False # either too many or not enough spies on the mission to sabotage
             else:
                 return random() < 0.2 * self.round() # betray more later in game

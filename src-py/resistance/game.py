@@ -1,5 +1,6 @@
 from agent import Agent
 from random_agent import RandomAgent
+from first_agent.first_agent import FirstAgent
 import random
 
 class Game:
@@ -39,21 +40,28 @@ class Game:
         #initialise rounds
         self.missions_lost = 0
         self.rounds = []
-            
+        '''
+        print(f"Number of players: {self.num_players}")
+        print(f"Spies: {sorted(self.spies)}")
+        print(f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}")
+        '''
 
     def play(self):
         leader_id = 0
         for i in range(5):
-            self.rounds.append(Round(leader_id,self.agents, self.spies, i))
+            r = Round(leader_id,self.agents, self.spies, i)
+            self.rounds.append(r)
             if not self.rounds[i].play(): self.missions_lost+= 1
             for a in self.agents:
                 a.round_outcome(i+1, self.missions_lost)
-            leader_id = (leader_id+len(self.rounds[i].missions)) % len(self.agents)    
+            leader_id = (leader_id+len(self.rounds[i].missions)) % len(self.agents)  
+            if self.missions_lost == 3 or len(self.rounds) - self.missions_lost == 3:
+                break 
         for a in self.agents:
             a.game_outcome(self.missions_lost<3, self.spies)
 
     def __str__(self):
-        s = 'Game between agents:' + str(self.agents)
+        s = '\nGame between agents: ' + str(self.agents) + '\n'
         for r in self.rounds:
             s = s + '\n' + str(r)
         if self.missions_lost<3:
@@ -85,14 +93,14 @@ class Round():
         '''
         produces a string representation of the round
         '''
-        s = 'Round:' + str(self.rnd)
+        s = 'Round: ' + str(self.rnd)
         for m in self.missions:
             s = s +'\n'+str(m)
         if self.is_successful():
             s = s + '\nResistance won the round.'
         else:
             s = s + '\nResistance lost the round.'
-        return s    
+        return s+'\n'
 
     def __repr__(self):
         '''
@@ -170,14 +178,14 @@ class Mission():
         '''
         Gives a string representation of the mission
         '''
-        s = 'Leader:'+str(self.agents[self.leader_id])+'\nTeam: '
+        s = 'Leader: '+str(self.agents[self.leader_id])+'\nTeam: '
         for i in self.team:
             s += str(self.agents[i])+', '
         s = s[:-2]+'\nVotes for: '
         for i in self.votes_for:
             s+= str(self.agents[i])+', '
         if self.is_approved():    
-            s = s[:-2]+'\nFails recorded:'+ str(len(self.fails))
+            s = s[:-2]+'\nFails recorded: '+ str(len(self.fails))
             s += '\nMission '+ ('Succeeded' if self.is_successful() else 'Failed')
         else:
             s = s[:-2]+'\nMission Aborted'
@@ -187,7 +195,7 @@ class Mission():
         '''
         Creates formal (json) representation of the mission
         '''
-        return 'Mission(leader_id='+ self.agents[leader_id] \
+        return 'Mission(leader_id='+ self.agents[self.leader_id] \
                        + ', team='+self.team \
                        +', agents='+self.agents \
                        +', rnd='+self.rnd \
@@ -212,6 +220,9 @@ class Mission():
         '''
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
                 
+game = Game([FirstAgent(str(i)) for i in range(5)])
+game.play()
+print(game)
 
 
 

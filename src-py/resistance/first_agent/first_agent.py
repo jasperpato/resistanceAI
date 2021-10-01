@@ -22,7 +22,6 @@ class FirstAgent(Agent):
     def __init__(self, name='Japer'):
         self.name = name
         self.number_of_players = 0
-        self.players = []
         self.player_number = 0
         self.spy_list = []
         self.suspicions = {} # for each player, probability of being a spy
@@ -58,10 +57,9 @@ class FirstAgent(Agent):
         initialises the game, spy_list is empty if player is not a spy
         '''
         self.number_of_players = number_of_players
-        self.players = [p for p in range(number_of_players)]
         self.player_number = player_number
         self.spy_list = spy_list
-        for p in self.players:
+        for p in range(number_of_players):
             self.suspicions[p] = self.spy_count[number_of_players] / number_of_players
         self.missions = []
 

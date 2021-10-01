@@ -1,4 +1,4 @@
-from random import randrange
+from random import randint
 from game import *
 
 '''
@@ -7,7 +7,7 @@ Simulate games and print aggregates
 f_wins = 0
 r_wins = 0
 for i in range(10000):
-    n = randrange(6)
+    n = randint(0,5)
     g = Game([RandomAgent(str(j)) for j in range(n)] + [FirstAgent(str(5-j)) for j in range(5-n)])
     g.play()
     if g.missions_lost < 3:

@@ -1,8 +1,8 @@
 from agent import Agent
-from random_agent import RandomAgent
+from human import HumanAgent
 import random
 
-class Game:
+class PrintGame:
     '''
     A class for maintaining the state of a game of The Resistance.
     A agent oriented architecture is maintained where the 
@@ -28,6 +28,7 @@ class Game:
         self.num_players = len(agents)
         #allocate spies
         self.spies = []
+        self.humans = []
         while len(self.spies) < Agent.spy_count[self.num_players]:
             spy = random.randrange(self.num_players)
             if spy not in self.spies:
@@ -36,24 +37,36 @@ class Game:
         for agent_id in range(self.num_players):
             spy_list = self.spies.copy() if agent_id in self.spies else []
             self.agents[agent_id].new_game(self.num_players,agent_id, spy_list)
+            if isinstance(self.agents[agent_id], HumanAgent): self.humans.append(agent_id)
         #initialise rounds
         self.missions_lost = 0
         self.rounds = []
-            
+
+        print(f"Number of players: {self.num_players}")
+        print(f"Humans: {self.humans}, AIs:\
+        {[i for i in range(self.num_players) if i not in self.humans]}")
+        input("Press enter to view teams.")
+        print(f"Spies: {sorted(self.spies)}, Resistance:\
+        {sorted([i for i in range(self.num_players) if i not in self.spies])}")
+        input("Press enter to hide teams.")
+        print('\n'*10)
 
     def play(self):
         leader_id = 0
         for i in range(5):
-            self.rounds.append(Round(leader_id,self.agents, self.spies, i))
+            r = Round(leader_id,self.agents, self.spies, i)
+            self.rounds.append(r)
             if not self.rounds[i].play(): self.missions_lost+= 1
             for a in self.agents:
                 a.round_outcome(i+1, self.missions_lost)
-            leader_id = (leader_id+len(self.rounds[i].missions)) % len(self.agents)    
+            leader_id = (leader_id+len(self.rounds[i].missions)) % len(self.agents)  
+            if self.missions_lost == 3 or len(self.rounds) - self.missions_lost == 3:
+                break 
         for a in self.agents:
             a.game_outcome(self.missions_lost<3, self.spies)
 
     def __str__(self):
-        s = 'Game between agents:' + str(self.agents)
+        s = '\nGame between agents: ' + str(self.agents) + '\n'
         for r in self.rounds:
             s = s + '\n' + str(r)
         if self.missions_lost<3:
@@ -85,14 +98,14 @@ class Round():
         '''
         produces a string representation of the round
         '''
-        s = 'Round:' + str(self.rnd)
+        s = 'Round: ' + str(self.rnd)
         for m in self.missions:
             s = s +'\n'+str(m)
         if self.is_successful():
             s = s + '\nResistance won the round.'
         else:
             s = s + '\nResistance lost the round.'
-        return s    
+        return s+'\n'
 
     def __repr__(self):
         '''
@@ -170,14 +183,14 @@ class Mission():
         '''
         Gives a string representation of the mission
         '''
-        s = 'Leader:'+str(self.agents[self.leader_id])+'\nTeam: '
+        s = 'Leader: '+str(self.agents[self.leader_id])+'\nTeam: '
         for i in self.team:
             s += str(self.agents[i])+', '
         s = s[:-2]+'\nVotes for: '
         for i in self.votes_for:
             s+= str(self.agents[i])+', '
         if self.is_approved():    
-            s = s[:-2]+'\nFails recorded:'+ str(len(self.fails))
+            s = s[:-2]+'\nFails recorded: '+ str(len(self.fails))
             s += '\nMission '+ ('Succeeded' if self.is_successful() else 'Failed')
         else:
             s = s[:-2]+'\nMission Aborted'
@@ -211,3 +224,10 @@ class Mission():
         raises an exception if the mission is not approved or fails not recorded.
         '''
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
+
+
+
+
+
+
+

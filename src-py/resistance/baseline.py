@@ -8,14 +8,15 @@ class Mission:
     A Mission is either: [team proposition + vote]             (aborted)
                      or: [team proposition + vote + outcome]   (carried out)
     '''
-    def __init__(self, number_of_players, round, proposer, team, votes_for):
+    def __init__(self, number_of_players, rnd, proposer, team, votes_for):
         self.number_of_players = number_of_players
-        self.round = round
+        self.round = rnd            # 1 - 5
         self.proposer = proposer
-        self.team = team # list of players proposed
-        self.votes_for = votes_for # dictionary mapping players to boolean vote
-        self.betrayals = None # number of betrayals or None if no mission carried out
-        self.success = None # True iff mission succeeded, None if no mission carried out
+        self.team = team            # list of players proposed
+        self.votes_for = votes_for  # dictionary mapping players to boolean vote
+        self.betrayals = None       # number of betrayals or None if no mission carried out
+        self.success = None         # True iff mission succeeded, None if no mission carried out
+        # change this to handle 5 failed votes
 
     def carried_out(self): 
         return self.success is not None
@@ -57,7 +58,7 @@ class BaselineAgent(Agent):
             if m.carried_out(): r += 1
         return r
 
-    def round(self):
+    def rnd(self):
         return self.rounds_completed() + 1
 
     def average_suspicion(self):
@@ -132,28 +133,28 @@ class BaselineAgent(Agent):
                     self.most_suspicious_resistance(team_size-2)
 
     def vote(self, mission, proposer):
-        if self.round() == 1 or proposer == self.player_number \
+        if self.rnd() == 1 or proposer == self.player_number \
         or self.missions_downvoted == 4:
             return True
         if self.is_spy():
             if self.missions_succeeded() == 2:
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission):
-                return random() < self.vote_spy_rate * round()
+                return random() < self.vote_spy_rate * self.rnd()
         return self.mission_suspicion(mission) < self.vote_threshold
 
     def vote_outcome(self, mission, proposer, votes):
         '''
         Add a new Mission object to our stored info
         '''
-        self.missions.append(Mission(self.number_of_players, self.round(), proposer, mission, votes))
+        self.missions.append(Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
 
     def betray(self, mission, proposer):
         if self.is_spy():
             number_of_spies_on_mission = len([i for i in self.spy_list if i in mission])
             if (self.missions_succeeded() == 2): return True
             elif number_of_spies_on_mission != self.betrayals_required(): return False
-            else: return random() < self.betray_rate * self.round()
+            else: return random() < self.betray_rate * self.rnd()
         return False # is resistance
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):

@@ -1,0 +1,4 @@
+Miscellaneous Notes
+
+- Resistance members could still vote for a mission if they believe only one spy
+  is on that mission when betrayals required = 2, but might be too much of a risk

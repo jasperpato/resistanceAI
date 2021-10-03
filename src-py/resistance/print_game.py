@@ -5,8 +5,8 @@ import random, sys, time
 
 class PrintGame:
     '''
-    A copy of Game, however the game state is printed throughout play to inform
-    human players.
+    A copy of Game, however the game state is printed throughout play (not afterwards)
+    to inform human players.
     '''
 
     def __init__(self, agents):
@@ -123,5 +123,5 @@ class Mission():
     def is_successful(self):
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
-p = PrintGame([HumanAgent() for i in range(5)])
+p = PrintGame([RandomAgent() for i in range(6)] + [HumanAgent()])
 p.play()

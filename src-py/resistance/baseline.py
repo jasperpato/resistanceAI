@@ -17,7 +17,8 @@ class Mission:
         self.betrayals = None # number of betrayals or None if no mission carried out
         self.success = None # True iff mission succeeded, None if no mission carried out
 
-    def carried_out(self): return self.success is not None
+    def carried_out(self): 
+        return self.success is not None
 
     def votes_against(self):
         return [i for i in range(self.number_of_players) if i not in self.votes_for]
@@ -26,15 +27,10 @@ class BaselineAgent(Agent):
 
     def __init__(self, name='Japer'):
         self.name = name
-        self.number_of_players = 0
-        self.player_number = 0
-        self.spy_list = []
-        self.suspicions = {} # for each player, probability of being a spy
-        self.missions = []   # stores all game history
-        self.vote_threshold = 0 # average suspicion of a mission required to downvote (for Resistance)
         seed(time())
 
-    def is_spy(self): return self.spy_list != []
+    def is_spy(self):
+        return self.spy_list != []
 
     def missions_failed(self):
         f = 0
@@ -61,7 +57,8 @@ class BaselineAgent(Agent):
             if m.carried_out(): r += 1
         return r
 
-    def round(self): return self.rounds_completed() + 1
+    def round(self):
+        return self.rounds_completed() + 1
 
     def average_suspicion(self):
         return self.spy_count[self.number_of_players] / self.number_of_players
@@ -76,8 +73,7 @@ class BaselineAgent(Agent):
         self.number_of_players = number_of_players
         self.player_number = player_number
         self.spy_list = spy_list
-        for p in range(number_of_players):
-            self.suspicions[p] = self.average_suspicion()
+        self.suspicions =  {i:self.average_suspicion() for i in range(self.number_of_players)}
         self.missions = []
 
         # Resistance votes for a mission if average mission suspicion is less than this
@@ -136,7 +132,9 @@ class BaselineAgent(Agent):
                     self.most_suspicious_resistance(team_size-2)
 
     def vote(self, mission, proposer):
-        if(self.round() == 1 or proposer == self.player_number): return True
+        if self.round() == 1 or proposer == self.player_number \
+        or self.missions_downvoted == 4:
+            return True
         if self.is_spy():
             if self.missions_succeeded() == 2:
                 return True if self.enough_spies(mission) else False
@@ -160,7 +158,7 @@ class BaselineAgent(Agent):
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
-        update the last Mission object with mission info
+        Update the last Mission object with mission info
         '''
         self.missions[-1].betrayals = betrayals
         self.missions[-1].success = mission_success
@@ -169,13 +167,13 @@ class BaselineAgent(Agent):
 
     def round_outcome(self, rounds_complete, missions_failed):
         '''
-        unnecessary - can infer this information
+        Unnecessary - can infer this information
         '''
         pass
     
     def game_outcome(self, spies_win, spies):
         '''
-        unnecessary - do not store info between games (yet...)
+        Unnecessary - do not store info between games (yet...)
         '''
         pass
 

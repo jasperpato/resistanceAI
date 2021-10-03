@@ -40,7 +40,7 @@ class PrintGame:
         f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}", end='')
         sys.stdout.flush()
         time.sleep(5)
-        sys.stdout.write('\r' + ' ' * 100 + '\n')
+        sys.stdout.write('\r' + ' ' * 100)
         sys.stdout.flush()
 
     def play(self):
@@ -57,7 +57,7 @@ class PrintGame:
         for a in self.agents:
             a.game_outcome(self.missions_lost<3, self.spies) 
 
-        print("Resistance won\n" if self.missions_lost<3 else "Spies won\n") 
+        print("\nResistance won\n" if self.missions_lost<3 else "Spies won\n") 
 
 class Round():
 
@@ -72,11 +72,11 @@ class Round():
         mission_size = Agent.mission_sizes[len(self.agents)][self.rnd]
         fails_required = Agent.fails_required[len(self.agents)][self.rnd]
         while len(self.missions)<5:
+            print(f"\nRound: {self.rnd+1}")
+            print(f"Leader: {self.leader_id}")
+            print(f"Fails required: {fails_required}")
             team = self.agents[self.leader_id].propose_mission(mission_size, fails_required)
-            print(f"Round: {self.rnd}")
-            print(f"Leader: {str(self.agents[self.leader_id])}")
             print(f"Mission: {team}")
-            print(f"Fails required: {fails_required}\n")
             mission = Mission(self.leader_id, team, self.agents, self.spies, self.rnd)
             self.missions.append(mission)
             self.leader_id = (self.leader_id+1) % len(self.agents)
@@ -84,7 +84,7 @@ class Round():
                 return mission.is_successful()
 
         if len(self.missions) == 5:
-            print("Mission failed")
+            print("\nMission failed")
         
         return mission.is_successful()   
 
@@ -104,9 +104,9 @@ class Mission():
 
     def run(self):    
         self.votes_for = [i for i in range(len(self.agents)) if self.agents[i].vote(self.team, self.leader_id)]
+        print()
         for i in range(len(self.agents)):
             print(str(i) + (": yes" if i in self.votes_for else ": no"))
-        print()
         for a in self.agents:
             a.vote_outcome(self.team, self.leader_id, self.votes_for)
         if 2*len(self.votes_for) > len(self.agents):
@@ -115,7 +115,7 @@ class Mission():
             for a in self.agents:
                 a.mission_outcome(self.team,self.leader_id, len(self.fails), success)
             print("\nMission " + ("succeeded" if success else "failed"))
-            print(f"Betrayals: {len(self.fails)}\n")
+            print(f"Betrayals: {len(self.fails)}")
     
     def is_approved(self):
         return 2*len(self.votes_for) > len(self.agents)
@@ -123,5 +123,5 @@ class Mission():
     def is_successful(self):
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
-p = PrintGame([RandomAgent() for i in range(4)] + [HumanAgent()])
+p = PrintGame([HumanAgent() for i in range(5)])
 p.play()

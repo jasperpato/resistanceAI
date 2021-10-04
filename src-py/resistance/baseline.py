@@ -109,16 +109,22 @@ class BaselineAgent(Agent):
         return [i for i in reversed(self.least_suspicious(self.number_of_players))
                 if i not in self.spy_list][:n]
 
+    def number_of_spies(self, mission):
+        '''
+        Spy method
+        returns number of spies on mission
+        '''
+        return len([i for i in self.spy_list if i in mission])
+
     def enough_spies(self, mission):
         '''
         Spy method
         returns True iff there are enough spies in mission to fail the mission
         '''
-        return len([s for s in self.spy_list if s in mission]) >= self.betrayals_required()
+        return self.number_of_spies(mission) >= self.betrayals_required()
 
     def mission_suspicion(self, mission):
         '''
-        Spy method
         returns average suspicion of players in a mission
         '''
         return sum([s[1] for s in self.suspicions.items() if s[0] in mission]) / len(mission)
@@ -151,9 +157,8 @@ class BaselineAgent(Agent):
 
     def betray(self, mission, proposer):
         if self.is_spy():
-            number_of_spies_on_mission = len([i for i in self.spy_list if i in mission])
             if (self.missions_succeeded() == 2): return True
-            elif number_of_spies_on_mission != self.betrayals_required(): return False
+            elif self.number_of_spies(mission)) != self.betrayals_required(): return False
             else: return random() < self.betray_rate * self.rnd()
         return False # is resistance
 
@@ -165,6 +170,7 @@ class BaselineAgent(Agent):
         self.missions[-1].success = mission_success
 
         # update suspicions
+        # assume there was only one spy in a 1-betrayed mission
 
     def round_outcome(self, rounds_complete, missions_failed):
         '''

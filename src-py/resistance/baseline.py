@@ -7,7 +7,7 @@ class Mission:
     '''
     Stores game history.
     A Mission is either: [team proposition + vote]             (aborted)
-                     or: [team proposition + vote + outcome]   (carried out)
+    or: [team proposition + vote + outcome]   (carried out)
     '''
     def __init__(self, number_of_players, rnd, proposer, team, votes_for):
         self.number_of_players = number_of_players
@@ -208,28 +208,32 @@ class BaselineAgent(Agent):
         if not mission_success:
             self.failed_teams.append(mission)
 
-        prob = 0 # probability of this mission outcome
+        prob = 0 # overall probability of this mission outcome
         betray_rate = self.betray_rate * self.rounds_completed()
-        for w, p in self.worlds.items():
+        for w, wp in self.worlds.items():
             spies_in_mission = len([x for x in w if x in mission])
             if spies_in_mission >= betrayals:
-                print("dsjf")
-                prob += (betrayals*betray_rate * (spies_in_mission-betrayals) \
-                      * (1-betray_rate)) * p
+                p = wp
+                for i in range(betrayals): p *= betray_rate
+                for i in range(spies_in_mission - betrayals): p *= 1-betray_rate
+                prob += p
 
         if len(self.worlds) > 1:
-            for w, p in self.worlds.items():
+            for w, wp in self.worlds.items():
                 spies_in_mission = len([x for x in w if x in mission])
                 if spies_in_mission == betrayals and len(mission) == betrayals:
                     self.worlds = {w:1}
-                    break
+                    break   
                 elif spies_in_mission < betrayals: self.worlds[w] = 0
                 else:
-                    self.worlds[w] = \
-                    p * (betrayals*betray_rate * (spies_in_mission-betrayals) \
-                      * (1-betray_rate)) / prob
+                    for i in range(betrayals): self.worlds[w] *= betray_rate
+                    for i in range(spies_in_mission - betrayals):
+                        self.worlds[w] *= 1 - betray_rate
+                    self.worlds[w] /= prob
             self.update_suspicions()
 
     def round_outcome(self, rounds_complete, missions_failed): pass
     
     def game_outcome(self, spies_win, spies): pass
+
+

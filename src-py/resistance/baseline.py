@@ -1,6 +1,7 @@
 from agent import Agent
 from random import random, seed
 from time import time
+from itertools import combinations
 
 class Mission:
     '''
@@ -12,60 +13,72 @@ class Mission:
         self.number_of_players = number_of_players
         self.round = rnd            # 1 - 5
         self.proposer = proposer
-        self.team = team            # list of players proposed
-        self.votes_for = votes_for  # dictionary mapping players to boolean vote
-        self.betrayals = None       # number of betrayals or None if no mission carried out
-        self.success = None         # True iff mission succeeded, None if no mission carried out
-        # change this to handle 5 failed votes
+        self.team = team
+        self.votes_for = votes_for
+        self.betrayals = None       # None if no mission carried out
+        self.success = None         # None if no mission carried out, but False
+                                    # if this is the fifth aborted mission
 
-    def carried_out(self): 
-        return self.success is not None
+    def completed(self): return self.success is not None
 
-    def votes_against(self):
-        return [i for i in range(self.number_of_players) if i not in self.votes_for]
-
-class BaselineAgent(Agent):        
+class BaselineAgent(Agent):    
+    '''
+    Maintains probabilities of all possible worlds.
+    Calculates the probabilty of each player being a spy from set of worlds.
+    Assumes all other players are also BaselineAgents when calculating
+    probabilities of worlds.
+    '''    
 
     def __init__(self, name='Japer'):
         self.name = name
         seed(time())
 
-    def is_spy(self):
-        return self.spy_list != []
+    def is_spy(self): return self.spy_list != []
 
     def missions_failed(self):
         f = 0
         for m in self.missions:
-            if m.carried_out() and not m.success: f += 1
+            if m.completed() and not m.success: f += 1
         return f
 
     def missions_succeeded(self):
         s = 0
         for m in self.missions:
-            if m.carried_out() and m.success: s += 1
+            if m.completed() and m.success: s += 1
         return s
 
     def missions_downvoted(self):
         d = 0
         for m in reversed(self.missions):
-            if not m.carried_out(): d += 1
+            if not m.completed(): d += 1
             else: break
         return d
 
     def rounds_completed(self):
         r = 0
         for m in self.missions:
-            if m.carried_out(): r += 1
+            if m.completed(): r += 1
         return r
 
-    def rnd(self):
-        return self.rounds_completed() + 1
+    def rnd(self): return self.rounds_completed() + 1
 
     def average_suspicion(self):
         return self.spy_count[self.number_of_players] / self.number_of_players
 
     def betrayals_required(self):
-        return self.fails_required[self.number_of_players][self.rounds_completed()]
+     return self.fails_required[self.number_of_players][self.rounds_completed()]
+
+    def update_suspicions(self):
+        '''
+        Updates self.suspicions to reflect the probability of each player being
+        a spy
+        '''
+        suspicions = {x:0 for x in range(self.number_of_players)}
+        worlds = self.worlds.items()
+        for x in range(self.number_of_players):
+            for s, p in worlds:
+                if x in s: suspicions[x] += p
+        self.suspicions = suspicions
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''
@@ -74,47 +87,33 @@ class BaselineAgent(Agent):
         self.number_of_players = number_of_players
         self.player_number = player_number
         self.spy_list = spy_list
-        self.suspicions =  {i:self.average_suspicion() for i in range(self.number_of_players)}
         self.missions = []
+        self.failed_teams = [] # teams that betrayed - avoid them
 
-        # Resistance votes for a mission if average mission suspicion is less than this
-        self.vote_threshold = 1.1 * self.average_suspicion()
-        # this * round number is the chance a spy votes for a fail-able mission 
-        self.vote_spy_rate = 0.2
-        # this * round number is the chance a spy betrays the mission
+        others = [x for x in range(number_of_players) if x != player_number]
+        worlds = list(combinations(others, self.spy_count[number_of_players]))
+        self.worlds = {w:1/len(worlds) for w in worlds}
+        self.update_suspicions()
+
+        self.vote_threshold = 1.2
+        self.vote_failable_rate = 0.2
         self.betray_rate = 0.2
 
-    def least_suspicious(self, n):
+    def possible_teams(self, l):
         '''
-        Resistance method
-        returns the n least suspicious players, not including self
+        Returns list of all possible teams of length l including self,
+        in ascending average suspicion
         '''
-        d = self.suspicions.copy()
-        d.pop(self.player_number)
-        return [i[0] for i in sorted(d.items(), key=lambda x: x[1])][:n]
-
-    def least_suspicious_spies(self, n):
-        '''
-        Spy method
-        returns the n least suspicious spies, not including self
-        '''
-        return [i for i in self.least_suspicious(self.number_of_players)
-                if i in self.spy_list][:n]
-
-    def most_suspicious_resistance(self, n):
-        '''
-        Spy method
-        returns the n most suspicious resistance members
-        '''
-        return [i for i in reversed(self.least_suspicious(self.number_of_players))
-                if i not in self.spy_list][:n]
+        teams = [t for t in list(combinations(range(self.number_of_players), l))
+                if self.player_number in t]
+        return sorted(teams, key=lambda t: sum([self.suspicions[x] for x in t]))
 
     def number_of_spies(self, mission):
         '''
         Spy method
         returns number of spies on mission
         '''
-        return len([i for i in self.spy_list if i in mission])
+        return len([x for x in self.spy_list if x in mission])
 
     def enough_spies(self, mission):
         '''
@@ -123,66 +122,114 @@ class BaselineAgent(Agent):
         '''
         return self.number_of_spies(mission) >= self.betrayals_required()
 
-    def mission_suspicion(self, mission):
+    def bad_mission(self, mission):
         '''
-        returns average suspicion of players in a mission
+        Returns True iff this mission configuration has already ended in
+        betrayal
         '''
-        return sum([s[1] for s in self.suspicions.items() if s[0] in mission]) / len(mission)
+        for m in self.failed_teams:
+            if mission == m or set(mission).issubset(m): return True
+        return False
 
     def propose_mission(self, team_size, betrayals_required = 1):
-        if not self.is_spy():
-            return [self.player_number] + self.least_suspicious(team_size-1)
-        elif betrayals_required == 1:
-            return [self.player_number] + self.most_suspicious_resistance(team_size-1)  
+        '''
+        Propose the least suspicious team including self.
+        If spy and two betrayals required, try to return the least suspicious
+        team containing two spies.
+        '''
+        ps = self.possible_teams(team_size)
+        if not self.is_spy() or betrayals_required == 1:
+            team = ps[0]
+            for n in range(1, len(ps)):
+                if self.bad_mission(team): team = ps[n]
+                else: return team
         elif betrayals_required == 2:
-            return [self.player_number, self.least_suspicious_spies(1)] + \
-                    self.most_suspicious_resistance(team_size-2)
+            team = ps[0]
+            for n in range(1, len(ps)):
+                if self.bad_mission(team) or not self.enough_spies(team):
+                    team = ps[n]
+                else: return team
+            if self.missions_succeeded() < 2:
+                team = ps[0]
+                for n in range(1, len(ps)):
+                    if self.bad_mission(team): team = ps[n]
+                    else: return team
+            else:
+                team = ps[0]
+                for n in range(1, len(ps)):
+                    if not self.enough_spies(team): team = ps[n]
+                    else: return team
+
+    def mission_suspicion(self, mission):
+        return sum([self.suspicions[x] for x in mission])
 
     def vote(self, mission, proposer):
         if self.rnd() == 1 or proposer == self.player_number \
-        or self.missions_downvoted == 4:
+        or self.missions_downvoted() == 4:
             return True
         if self.is_spy():
             if self.missions_succeeded() == 2:
                 return True if self.enough_spies(mission) else False
-            if self.enough_spies(mission):
-                return random() < self.vote_spy_rate * self.rnd()
-        return self.mission_suspicion(mission) < self.vote_threshold
+            if self.enough_spies(mission) and not self.bad_mission(mission):
+                return random() < self.vote_failable_rate * self.rnd()
+        if self.bad_mission(mission): return False
+        return self.mission_suspicion(mission) <= \
+               self.vote_threshold * self.average_suspicion()
 
     def vote_outcome(self, mission, proposer, votes):
         '''
         Add a new Mission object to our stored info
         '''
-        self.missions.append(Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
+        self.missions.append(
+          Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
+        f = 0
+        for m in reversed(self.missions):
+            if not m.completed(): f += 1
+            if f == 5:
+                self.missions[-1].success = False
+                break
 
     def betray(self, mission, proposer):
         if self.is_spy():
-            if (self.missions_succeeded() == 2): return True
-            elif self.number_of_spies(mission)) != self.betrayals_required(): return False
+            if self.missions_succeeded() == 2: return True
+            elif self.number_of_spies(mission) != self.betrayals_required():
+                return False
             else: return random() < self.betray_rate * self.rnd()
         return False # is resistance
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
         Update the last Mission object with mission info
+        Assumes opponent spies betray with probability of
+        self.betray_rate * self.rounds_completed()
         '''
         self.missions[-1].betrayals = betrayals
         self.missions[-1].success = mission_success
+        if not mission_success:
+            self.failed_teams.append(mission)
 
-        # update suspicions
-        # assume there was only one spy in a 1-betrayed mission
+        prob = 0 # probability of this mission outcome
+        betray_rate = self.betray_rate * self.rounds_completed()
+        for w, p in self.worlds.items():
+            spies_in_mission = len([x for x in w if x in mission])
+            if spies_in_mission >= betrayals:
+                print("dsjf")
+                prob += (betrayals*betray_rate * (spies_in_mission-betrayals) \
+                      * (1-betray_rate)) * p
 
-    def round_outcome(self, rounds_complete, missions_failed):
-        '''
-        Unnecessary - can infer this information
-        '''
-        pass
+        if len(self.worlds) > 1:
+            for w, p in self.worlds.items():
+                spies_in_mission = len([x for x in w if x in mission])
+                if spies_in_mission == betrayals and len(mission) == betrayals:
+                    self.worlds = {w:1}
+                    break
+                elif spies_in_mission < betrayals: self.worlds[w] = 0
+                else:
+                    self.worlds[w] = \
+                    p * (betrayals*betray_rate * (spies_in_mission-betrayals) \
+                      * (1-betray_rate)) / prob
+            self.update_suspicions()
+
+    def round_outcome(self, rounds_complete, missions_failed): pass
     
-    def game_outcome(self, spies_win, spies):
-        '''
-        Unnecessary - do not store info between games (yet...)
-        '''
-        pass
-
-
-
+    def game_outcome(self, spies_win, spies): pass

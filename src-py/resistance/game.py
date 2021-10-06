@@ -119,7 +119,7 @@ class Round():
             self.leader_id = (self.leader_id+1) % len(self.agents)
             if mission.is_approved():
                 return mission.is_successful()
-        return mission.is_successful()   
+        return self.is_successful()   
 
     def is_successful(self):
         '''

@@ -19,8 +19,6 @@ class Mission:
         self.success = None         # None if no mission carried out, but False
                                     # if this is the fifth aborted mission
 
-    def completed(self): return self.success is not None
-
 class BaselineAgent(Agent):    
     '''
     Maintains probabilities of all possible worlds.
@@ -38,26 +36,26 @@ class BaselineAgent(Agent):
     def missions_failed(self):
         f = 0
         for m in self.missions:
-            if m.completed() and not m.success: f += 1
+            if m.success == False: f += 1
         return f
 
     def missions_succeeded(self):
         s = 0
         for m in self.missions:
-            if m.completed() and m.success: s += 1
+            if m.success: s += 1
         return s
 
     def missions_downvoted(self):
         d = 0
         for m in reversed(self.missions):
-            if not m.completed(): d += 1
+            if m.success is None: d += 1
             else: break
         return d
 
     def rounds_completed(self):
         r = 0
         for m in self.missions:
-            if m.completed(): r += 1
+            if m.success is not None: r += 1
         return r
 
     def rnd(self): return self.rounds_completed() + 1
@@ -66,6 +64,7 @@ class BaselineAgent(Agent):
         return self.spy_count[self.number_of_players] / self.number_of_players
 
     def betrayals_required(self):
+     print(self.rounds_completed())
      return self.fails_required[self.number_of_players][self.rounds_completed()]
 
     def update_suspicions(self):
@@ -182,12 +181,6 @@ class BaselineAgent(Agent):
         '''
         self.missions.append(
           Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
-        f = 0
-        for m in reversed(self.missions):
-            if not m.completed(): f += 1
-            if f == 5:
-                self.missions[-1].success = False
-                break
 
     def betray(self, mission, proposer):
         if self.is_spy():
@@ -208,17 +201,17 @@ class BaselineAgent(Agent):
         if not mission_success:
             self.failed_teams.append(mission)
 
-        prob = 0 # overall probability of this mission outcome
-        betray_rate = self.betray_rate * self.rounds_completed()
-        for w, wp in self.worlds.items():
-            spies_in_mission = len([x for x in w if x in mission])
-            if spies_in_mission >= betrayals:
-                p = wp
-                for i in range(betrayals): p *= betray_rate
-                for i in range(spies_in_mission - betrayals): p *= 1-betray_rate
-                prob += p
-
+        # TODO : what if no betrayals, everyone resistance....
         if len(self.worlds) > 1:
+            prob = 0 # overall probability of this mission outcome
+            betray_rate = self.betray_rate * self.rounds_completed()
+            for w, wp in self.worlds.items():
+                spies_in_mission = len([x for x in w if x in mission])
+                if spies_in_mission >= betrayals:
+                    p = wp
+                    for i in range(betrayals): p *= betray_rate
+                    for i in range(spies_in_mission - betrayals): p *= 1-betray_rate
+                    prob += p
             for w, wp in self.worlds.items():
                 spies_in_mission = len([x for x in w if x in mission])
                 if spies_in_mission == betrayals and len(mission) == betrayals:
@@ -232,7 +225,8 @@ class BaselineAgent(Agent):
                     self.worlds[w] /= prob
             self.update_suspicions()
 
-    def round_outcome(self, rounds_complete, missions_failed): pass
+    def round_outcome(self, rounds_complete, missions_failed):
+        self.missions[-1].success = (missions_failed == self.missions_failed())
     
     def game_outcome(self, spies_win, spies): pass
 

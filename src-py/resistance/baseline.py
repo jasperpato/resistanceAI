@@ -67,18 +67,6 @@ class BaselineAgent(Agent):
     def betrayals_required(self):
         return self.fails_required[self.number_of_players][self.rounds_completed()]
 
-    def update_suspicions(self):
-        '''
-        Updates self.suspicions to reflect the probability of each player being
-        a spy
-        '''
-        suspicions = {x:0 for x in range(self.number_of_players)}
-        worlds = self.worlds.items()
-        for x in range(self.number_of_players):
-            for s, p in worlds:
-                if x in s: suspicions[x] += p
-        self.suspicions = suspicions
-
     def new_game(self, number_of_players, player_number, spy_list):
         '''
         initialises the game, spy_list is empty if player is not a spy
@@ -89,8 +77,7 @@ class BaselineAgent(Agent):
         self.missions = []
         self.failed_teams = [] # teams that betrayed - avoid them
 
-        others = [x for x in range(number_of_players) if x != player_number]
-        worlds = list(combinations(others, self.spy_count[number_of_players]))
+        worlds = list(combinations(range(self.number_of_players), self.spy_count[number_of_players]))
         self.worlds = {w:1/len(worlds) for w in worlds}
         self.update_suspicions()
 
@@ -166,8 +153,7 @@ class BaselineAgent(Agent):
         return sum([self.suspicions[x] for x in mission if x != self.player_number])
 
     def vote(self, mission, proposer):
-        if self.rnd() == 1 or proposer == self.player_number \
-        or self.missions_downvoted() == 4:
+        if self.rnd() == 1 or proposer == self.player_number or self.missions_downvoted() == 4:
             return True
         if self.is_spy():
             if self.missions_succeeded() == 2:
@@ -175,15 +161,13 @@ class BaselineAgent(Agent):
             if self.enough_spies(mission) and not self.bad_mission(mission):
                 return random() < self.vote_failable_rate * self.rnd()
         if self.bad_mission(mission): return False
-        return self.mission_suspicion(mission) <= \
-               self.vote_threshold * self.average_suspicion()
+        return self.mission_suspicion(mission) <= self.vote_threshold * self.average_suspicion()
 
     def vote_outcome(self, mission, proposer, votes):
         '''
         Add a new Mission object to our stored info
         '''
-        self.missions.append(
-          Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
+        self.missions.append(Mission(self.number_of_players, self.rnd(), proposer, mission, votes))
 
     def betray(self, mission, proposer):
         if self.is_spy():
@@ -193,6 +177,18 @@ class BaselineAgent(Agent):
                 return False
             else: return random() < self.betray_rate * self.rnd()
         return False # is resistance
+
+    def update_suspicions(self):
+            '''
+            Updates self.suspicions to reflect the probability of each player being
+            a spy
+            '''
+            suspicions = {x:0 for x in range(self.number_of_players)}
+            worlds = self.worlds.items()
+            for x in range(self.number_of_players):
+                for s, p in worlds:
+                    if x in s: suspicions[x] += p
+            self.suspicions = suspicions
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
@@ -205,9 +201,9 @@ class BaselineAgent(Agent):
         if not mission_success:
             self.failed_teams.append(mission)
 
-        if len(self.worlds) > 1:
+        if len(self.worlds) > 1 and self.rounds_completed() < 5:
             prob = 0 # overall probability of this mission outcome
-            betray_rate = self.betray_rate * self.rounds_completed()
+            betray_rate = max(0.05, min(0.95, self.betray_rate * self.rounds_completed()))
             for w, wp in self.worlds.items():
                 spies_in_mission = len([x for x in w if x in mission])
                 if spies_in_mission >= betrayals:

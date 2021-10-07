@@ -9,9 +9,10 @@ Simulate games and print aggregates
 '''
 
 f_wins, r_wins, f_losses, r_losses = 0, 0, 0, 0
-for i in range(10):
-    n = randrange(6)
-    g = Game([RandomAgent(str(j)) for j in range(n)] + [BaselineAgent(str(j)) for j in range(n, 5)])
+for i in range(10000):
+    n = 8
+    r = randrange(n+1)
+    g = Game([RandomAgent(str(j)) for j in range(r)] + [BaselineAgent(str(j)) for j in range(r,n)])
     g.play()
     for j in range(5): 
         if g.missions_lost < 3:

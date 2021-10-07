@@ -13,7 +13,7 @@ class TestBaseline(unittest.TestCase):
 
     def test_mission_outcome(self):
         b = BaselineAgent("b0")
-        num_players = 5
+        num_players = 7
         
         for s in [2,3]:
             for mission in combinations(range(5), s):

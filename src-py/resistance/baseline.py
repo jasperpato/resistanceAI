@@ -187,7 +187,9 @@ class BaselineAgent(Agent):
 
     def betray(self, mission, proposer):
         if self.is_spy():
-            if self.missions_succeeded() == 2: return True
+            if self.missions_succeeded() == 2 and \
+               self.number_of_spies(mission) >= self.betrayals_required():
+                return True
             elif self.number_of_spies(mission) != self.betrayals_required():
                 return False
             else: return random() < self.betray_rate * self.rnd()
@@ -230,7 +232,7 @@ class BaselineAgent(Agent):
                     if spies_in_mission > 0: 
                         self.worlds[w] *= comb(spies_in_mission, betrayals)
                     self.worlds[w] /= prob
-            for w in impossible_worlds: self.worlds.pop(w)
+            for w in impossible_worlds: self.worlds.pop(w, None)
             self.update_suspicions()
 
     def round_outcome(self, rounds_complete, missions_failed):

@@ -10,11 +10,13 @@ Simulate games and print aggregates
 
 f_wins, r_wins, f_losses, r_losses = 0, 0, 0, 0
 for i in range(10000):
-    n = 8
+    n = 10
+    s = Agent.spy_count[n]
     r = randrange(n+1)
-    g = Game([RandomAgent(str(j)) for j in range(r)] + [BaselineAgent(str(j)) for j in range(r,n)])
+    g = Game([RandomAgent(str(j)) for j in range(r)] + [BaselineAgent(str(j)) for j in range(r,n)]) if i%2 else \
+        Game([BaselineAgent(str(j)) for j in range(r)] + [RandomAgent(str(j)) for j in range(r,n)])
     g.play()
-    for j in range(5): 
+    for j in range(n): 
         if g.missions_lost < 3:
             if j not in g.spies:
                 if isinstance(g.agents[j], BaselineAgent): f_wins += 1

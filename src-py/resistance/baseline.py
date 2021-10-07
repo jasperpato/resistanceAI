@@ -187,9 +187,8 @@ class BaselineAgent(Agent):
 
     def betray(self, mission, proposer):
         if self.is_spy():
-            if self.missions_succeeded() == 2 and \
-               self.number_of_spies(mission) >= self.betrayals_required():
-                return True
+            if self.missions_failed() == 2 and self.enough_spies(mission): return True
+            if self.missions_succeeded() == 2: return True
             elif self.number_of_spies(mission) != self.betrayals_required():
                 return False
             else: return random() < self.betray_rate * self.rnd()

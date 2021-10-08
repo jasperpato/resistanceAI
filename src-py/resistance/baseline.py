@@ -132,8 +132,7 @@ class BaselineAgent(Agent):
         elif betrayals_required == 2:
             team = ps[0]
             for n in range(1, len(ps)):
-                if self.bad_mission(team) or not self.enough_spies(team):
-                    team = ps[n]
+                if self.bad_mission(team) or not self.enough_spies(team): team = ps[n]
                 else: return team
             if self.missions_succeeded() < 2:
                 team = ps[0]
@@ -195,14 +194,12 @@ class BaselineAgent(Agent):
         Determines the probability of a mission outcome given a world
         Assume spy always betrays with probability betray_rate in a round
         '''
-        if spies_in_mission >= betrayals:
-            p = 1
-            for i in range(betrayals): p *= betray_rate
-            for i in range(spies_in_mission - betrayals): p *= 1 - betray_rate
-            if spies_in_mission > 0:    
-                p *= comb(spies_in_mission, betrayals)
-            return p
-        return 0
+        if spies_in_mission < betrayals: return 0
+        p = 1
+        for i in range(betrayals): p *= betray_rate
+        for i in range(spies_in_mission - betrayals): p *= 1 - betray_rate
+        if spies_in_mission > 0: p *= comb(spies_in_mission, betrayals)
+        return p
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
@@ -212,8 +209,7 @@ class BaselineAgent(Agent):
         '''
         self.missions[-1].betrayals = betrayals
         self.missions[-1].success = mission_success
-        if not mission_success:
-            self.failed_teams.append(mission)
+        if not mission_success: self.failed_teams.append(mission)
 
         if len(self.worlds) > 1 and self.rounds_completed() < 5:
             prob = 0 # overall probability of this mission outcome
@@ -227,10 +223,9 @@ class BaselineAgent(Agent):
                 if spies_in_mission == betrayals and len(mission) == betrayals:
                     self.worlds = {w:1}
                     break   
-                elif spies_in_mission < betrayals: impossible_worlds.append(w)
-                else:
-                    self.worlds[w] *= self.outcome_probability(spies_in_mission, betrayals, betray_rate)
-                    self.worlds[w] /= prob
+                self.worlds[w] *= self.outcome_probability(spies_in_mission, betrayals, betray_rate)
+                self.worlds[w] /= prob
+                if self.worlds[w] == 0: impossible_worlds.append(w)
             for w in impossible_worlds: self.worlds.pop(w, None)
             self.update_suspicions()
 

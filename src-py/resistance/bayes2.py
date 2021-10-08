@@ -20,11 +20,11 @@ class Mission:
         self.success = None         # None if no mission carried out, but False
                                     # if this is the fifth aborted mission
 
-class Bayes(Agent):    
+class Bayes2(Agent):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
-    Worlds probabilities are based on only mission outcomes.
+    World probabilities are updated on both vote patterns and mission outcomes.
     '''    
 
     def __init__(self, name='Japer'):

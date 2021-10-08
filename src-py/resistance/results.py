@@ -4,44 +4,48 @@ from determined_game import Game # first spy_count players in agent list become 
 from random_agent import Random
 from baseline import Baseline
 from bayes import Bayes
-from human import HumanAgent
+from human import Human
 from spy import Spy
-from random import randrange
+from random import randrange, choice
 
 '''
 Simulate games and print aggregates
 '''
-b_spy_wins, b_res_wins, b_spy_plays, b_res_plays = 0, 0, 0, 0
-r_spy_wins, r_res_wins, r_spy_plays, r_res_plays = 0, 0, 0, 0
+agent_classes = [Random, Baseline]
+stats = []
+for a in agent_classes:
+    stats.append({"spy_wins": 0, "spy_plays": 0, "res_wins": 0, "res_plays": 0})
+
 for i in range(1000):
     n = randrange(5,11)
-    s = Agent.spy_count[n]
-    r = randrange(n+1)
-    g = Game([Baseline() for j in range(s)] + [Random() for j in range(s,n)])
+    g = Game(choice(agent_classes)() for i in range(n))
     g.play()
     for j in range(n): 
 
-        if isinstance(g.agents[j], Baseline):
-             if j in g.spies: b_spy_plays += 1
-             else: b_res_plays += 1
-        else:
-            if j in g.spies: r_spy_plays += 1
-            else: r_res_plays += 1
+        for i, a in enumerate(agent_classes):
+            if isinstance(g.agents[j], a):
+                if j in g.spies: stats[i]["spy_plays"] += 1
+                else: stats[i]["res_plays"] += 1
 
         if g.missions_lost >= 3 and j in g.spies:
-            if isinstance(g.agents[j], Baseline): b_spy_wins += 1
-            else: r_spy_wins += 1
+            for i, a in enumerate(agent_classes):
+                if isinstance(g.agents[j], a):
+                    stats[i]["spy_wins"] += 1
+                
         elif g.missions_lost < 3 and j not in g.spies:
-            if isinstance(g.agents[j], Baseline): b_res_wins += 1
-            else: r_res_wins += 1
+            for i, a in enumerate(agent_classes):
+                if isinstance(g.agents[j], a):
+                    stats[i]["res_wins"] += 1
 
-print(f"\nBaseline spy wins {b_spy_wins} spy plays {b_spy_plays} spy win rate {round(b_spy_wins/b_spy_plays,4)}")
-#print(f"Baseline res wins {b_res_wins} res plays {b_res_plays} res res rate {round(b_res_wins/b_res_plays,4)}\n")
-print(f"Baseline overall win rate {round((b_spy_wins+b_res_wins)/(b_spy_plays+b_res_plays),4)}\n")
-
-#print(f"Other spy wins {r_spy_wins} spy plays {r_spy_plays} spy win rate {round(r_spy_wins/r_spy_plays,4)}")
-print(f"Other res wins {r_res_wins} res plays {r_res_plays} res win rate {round(r_res_wins/r_res_plays,4)}\n")
-print(f"Other overall win rate {round((r_spy_wins+r_res_wins)/(r_spy_plays+r_res_plays),4)}\n")
+print()
+for i, a in enumerate(agent_classes):
+    print(f"{a}: spy wins {stats[i]['spy_wins']}, spy plays {stats[i]['spy_plays']}" + \
+    f"spy win rate {stats[i]['spy_plays']/stats[i]['spy_plays']}" if stats[i]['spy_plays'] > 0 else "")
+    print(f"{a}: res wins {stats[i]['res_wins']}, res plays {stats[i]['res_plays']}" + \
+    f"res win rate {stats[i]['res_plays']/stats[i]['res_plays']}\n" if stats[i]['res_plays'] > 0 else "\n")
+    if stats[i]['spy_plays'] + stats[i]['res_plays'] > 0:
+        print(f"{a}: overall win rate" + \
+        f"{(stats[i]['spy_wins']+stats[i]['res_wins'])/(stats[i]['spy_plays']+stats[i]['res_plays'])}")
 
 
 

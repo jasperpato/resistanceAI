@@ -4,7 +4,7 @@ from determined_game import Game # first spy_count players in agent list become 
 from random_agent import Random
 from baseline import Baseline
 from bayes import Bayes
-from human import HumanAgent
+from human import Human
 from spy import Spy
 from random import randrange
 

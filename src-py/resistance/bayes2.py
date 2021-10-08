@@ -27,9 +27,9 @@ class Bayes2(Agent):
     World probabilities are updated on both vote patterns and mission outcomes.
     '''    
 
-    def __init__(self, name='Japer'):
+    def __init__(self, name='Bayes2'):
         self.name = name
-        seed(time())
+        self.class_str = "Bayes2"
 
     def is_spy(self): return self.spies != []
 

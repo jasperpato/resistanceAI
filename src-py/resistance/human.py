@@ -7,12 +7,7 @@ class Human(Agent):
     '''
     def __init__(self, name="Human"):
         self.name = name
-        self.number_of_players = 0
-        self.player_number = 0
-
-    def __str__(self): return 'Agent '+self.name
-
-    def __repr__(self): return self.__str__()
+        self.class_str = "Human"
 
     def new_game(self, number_of_players, player_number, spies):
         self.number_of_players = number_of_players

@@ -26,9 +26,9 @@ class Baseline(Agent):
     Calculates the probabilty of each player being a spy from set of worlds.
     '''    
 
-    def __init__(self, name='Japer'):
+    def __init__(self, name='Baseline'):
         self.name = name
-        seed(time())
+        self.class_str = "Baseline"
 
     def is_spy(self): return self.spies != []
 

@@ -14,7 +14,8 @@ class Human(Agent):
         self.player_number = player_number
 
     def propose_mission(self, team_size, fails_required = 1):
-        i = input(f"\nPlayer {self.player_number}, propose a team of {team_size}.\nInput player numbers separated by spaces: ")
+        i = input(f"\nPlayer {self.player_number}, propose a team of {team_size}." + \
+            "\nInput player numbers separated by spaces: ")
         team = []
         for j in i.split():
             if j == '': continue
@@ -30,7 +31,8 @@ class Human(Agent):
         return team
                 
     def vote(self, mission, proposer):
-        i = input(f"\nPlayer {self.player_number}, vote for leader: {proposer}, team: {mission}?\nInput y or n: ")
+        i = input(f"\nPlayer {self.player_number}, vote for leader: {proposer}," + \
+            "team: {mission}?\nInput y or n: ")
         if i == 'y': return True
         elif i == 'n': return False
         return self.vote(mission, proposer)
@@ -38,7 +40,8 @@ class Human(Agent):
     def vote_outcome(self, mission, proposer, votes): pass
 
     def betray(self, mission, proposer):
-        i = input(f"\nPlayer {self.player_number}, betray leader: {proposer}, team: {mission}?\nInput y or n: ")
+        i = input(f"\nPlayer {self.player_number}, betray leader: {proposer}," + \
+            "team: {mission}?\nInput y or n: ")
         if i == 'y': return True
         elif i == 'n': return False
         return self.betray(mission, proposer)

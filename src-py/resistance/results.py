@@ -3,47 +3,60 @@ from game import Game # spies are randomly assigned
 from random_agent import Random
 from baseline import Baseline
 from bayes import Bayes
-# from spy import Spy
 from random import randrange, choice
 
-'''
-Simulate games and print aggregates
-'''
-agent_classes = [Baseline, Bayes] # insert the agent classes to be played against each other
-stats = []
-for a in agent_classes:
-    stats.append({"spy_wins": 0, "spy_plays": 0, "res_wins": 0, "res_plays": 0})
+class AgentGroup():
+    '''
+    Collects the stats for each agent class.
+    '''
+    def __init__(self, agent_class):
+        self.agent_class = agent_class
+        self.name = agent_class().class_str
+        self.spy_wins = 0
+        self.res_wins = 0
+        self.spy_plays = 0
+        self.res_plays = 0
 
-for i in range(10000):
-    n = randrange(5,11)
-    g = Game([choice(agent_classes)() for i in range(n)])
-    g.play()
-    for j in range(n): 
+    def spy_win_rate(self):
+        if self.spy_plays <= 0: return 0
+        else: return round(self.spy_wins / self.spy_plays, 5)
 
-        for i, a in enumerate(agent_classes):
-            if isinstance(g.agents[j], a):
-                if j in g.spies: stats[i]["spy_plays"] += 1
-                else: stats[i]["res_plays"] += 1
+    def res_win_rate(self):
+        if self.res_plays <= 0: return 0
+        else: return round(self.res_wins / self.res_plays, 5)
+    
+    def win_rate(self):
+        if self.spy_plays + self.res_plays <= 0: return 0
+        else: return round((self.spy_wins + self.res_wins) / (self.spy_plays + self.res_plays), 5)
 
-        if g.missions_lost >= 3 and j in g.spies:
-            for i, a in enumerate(agent_classes):
-                if isinstance(g.agents[j], a):
-                    stats[i]["spy_wins"] += 1
-                
-        elif g.missions_lost < 3 and j not in g.spies:
-            for i, a in enumerate(agent_classes):
-                if isinstance(g.agents[j], a):
-                    stats[i]["res_wins"] += 1
+if __name__ == "__main__":
+    '''
+    Simulates s random games between the agents specified in agents and prints results
+    '''
+    s = 10000
+    agents = [Random, Bayes]
 
-print()
-for i, a in enumerate(agent_classes):
-    print(f"{a().class_str}: spy wins {stats[i]['spy_wins']}, spy plays {stats[i]['spy_plays']}," + \
-    f" spy win rate {stats[i]['spy_plays']/stats[i]['spy_plays']}" if stats[i]['spy_plays'] > 0 else "")
-    print(f"{a().class_str}: res wins {stats[i]['res_wins']}, res plays {stats[i]['res_plays']}," + \
-    f" res win rate {stats[i]['res_plays']/stats[i]['res_plays']}\n" if stats[i]['res_plays'] > 0 else "\n")
-    if stats[i]['spy_plays'] + stats[i]['res_plays'] > 0:
-        print(f"{a().class_str}: overall win rate " + \
-        f"{(stats[i]['spy_wins']+stats[i]['res_wins'])/(stats[i]['spy_plays']+stats[i]['res_plays'])}\n")
+    agent_groups = [AgentGroup(c) for c in agents]
+    for i in range(s):
+        n = randrange(5,11)
+        game = Game([choice(agents)() for i in range(n)])
+        game.play()
+        for j in range(n): 
+            for a in agent_groups:
+                if isinstance(game.agents[j], a.agent_class):
+                    if j in game.spies: a.spy_plays += 1
+                    else: a.res_plays += 1
+            if game.missions_lost >= 3 and j in game.spies:
+                for a in agent_groups:
+                    if isinstance(game.agents[j], a.agent_class): a.spy_wins += 1      
+            elif game.missions_lost < 3 and j not in game.spies:
+                for a in agent_groups:
+                    if isinstance(game.agents[j], a.agent_class): a.res_wins += 1
+    print()
+    for a in agent_groups:
+        print(f"{a.name}: spy wins {a.spy_wins}, spy plays {a.spy_plays}, spy win rate {a.spy_win_rate()}")
+        print(f"{a.name}: res wins {a.res_wins}, res plays {a.res_plays}, res win rate {a.res_win_rate()}\n")
+        print(f"{a.name}: overall win rate {a.win_rate()}\n")
 
 
 

@@ -1,8 +1,6 @@
 from agent import Agent
-from random import random, seed
-from time import time
+from random import random
 from itertools import combinations
-from math import comb
 
 class Mission:
     '''
@@ -72,9 +70,8 @@ class Baseline(Agent):
         self.missions = []
         self.failed_teams = [] # teams that betrayed - avoid them
 
-        self.vote_threshold = 1.0
-        self.vote_failable_rate = 0.2
         self.vote_unknown_mission_rate = 0.6
+        self.vote_failable_rate = 0.2
         self.betray_rate = 0.2
         self.risky_betray_rate = 0.2 # if there are more spies on mission than necessary
 
@@ -83,8 +80,7 @@ class Baseline(Agent):
         Returns list of all possible teams of length l including self,
         in ascending average suspicion
         '''
-        teams = [t for t in list(combinations(range(self.number_of_players), l))
-                 if self.player_number in t]
+        teams = [t for t in list(combinations(range(self.number_of_players), l)) if self.player_number in t]
         return teams
 
     def number_of_spies(self, mission):
@@ -166,11 +162,6 @@ class Baseline(Agent):
         return False # is resistance
 
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
-        '''
-        Update the last Mission object with mission info
-        Assumes opponent spies betray with probability of
-        self.betray_rate * self.rounds_completed()
-        '''
         self.missions[-1].betrayals = betrayals
         self.missions[-1].success = mission_success
         if not mission_success: self.failed_teams.append(mission)

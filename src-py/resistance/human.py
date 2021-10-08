@@ -1,6 +1,6 @@
 from agent import Agent
 
-class HumanAgent(Agent):
+class Human(Agent):
     '''
     A human agent.
     Actions must be input on the command line.

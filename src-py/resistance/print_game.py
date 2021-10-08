@@ -1,7 +1,5 @@
 from agent import Agent
-from human import HumanAgent
-from random_agent import RandomAgent
-from baseline import BaselineAgent
+from human import Human
 import random, sys, time
 
 class PrintGame:
@@ -28,7 +26,7 @@ class PrintGame:
         for agent_id in range(self.num_players):
             spy_list = self.spies.copy() if agent_id in self.spies else []
             self.agents[agent_id].new_game(self.num_players,agent_id, spy_list)
-            if isinstance(self.agents[agent_id], HumanAgent): self.humans.append(agent_id)
+            if isinstance(self.agents[agent_id], Human): self.humans.append(agent_id)
         #initialise rounds
         self.missions_lost = 0
         self.rounds = []
@@ -126,6 +124,3 @@ class Mission():
 
     def is_successful(self):
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
-
-p = PrintGame([BaselineAgent() for i in range(6)] + [HumanAgent()])
-p.play()

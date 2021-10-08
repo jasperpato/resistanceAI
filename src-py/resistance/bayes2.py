@@ -12,7 +12,7 @@ class Mission:
     '''
     def __init__(self, number_of_players, rnd, proposer, team, votes_for):
         self.number_of_players = number_of_players
-        self.round = rnd            # 1 - 5
+        self.round = rnd            # 0 - 4
         self.proposer = proposer
         self.team = team
         self.votes_for = votes_for
@@ -52,19 +52,17 @@ class Bayes2(Agent):
             else: break
         return d
 
-    def rounds_completed(self):
+    def rnd(self):
         r = 0
         for m in self.missions:
             if m.success is not None: r += 1
         return r
 
-    def rnd(self): return self.rounds_completed() + 1
-
     def average_suspicion(self):
         return self.spy_count[self.number_of_players] / self.number_of_players
 
     def betrayals_required(self):
-        return self.fails_required[self.number_of_players][self.rounds_completed()]
+        return self.fails_required[self.number_of_players][self.rnd()]
 
     def new_game(self, number_of_players, player_number, spies):
         '''
@@ -80,10 +78,21 @@ class Bayes2(Agent):
         self.worlds = {w: 1/len(worlds) for w in worlds}
         self.update_suspicions()
 
-        self.vote_threshold = 1.0
-        self.vote_failable_rate = 0.2
-        self.betray_rate = 0.2
-        self.risky_betray_rate = 0.2 # if there are more spies on mission than necessary
+        self.vote_threshold = 1.0           # multiplied by average suspicion
+        self.failable_vote_factor = 0.1     # multiplied by round number and added to vote_threshold
+        self.betray_rate = 0.2              # multiplied by round_number
+        self.risky_betray_rate = 0.2        # multiplied by round_number
+                                            # if there are more spies on mission than necessary
+
+        # opponent modelling
+        self.opponent_betray_rate = self.betray_rate # multiplied by round_number
+        
+        self.spy_vote_fail_factor = 0.08         # multiplied by round_number and added to 0.5
+        self.res_vote_fail_factor = -0.08        # multiplied by round_number and added to 0.5
+        
+        self.spy_vote_success_factor = -0.08       # multiplied by round_number and added to 0.5
+        self.res_vote_success_factor = 0.08        # multiplied by round_number and added to 0.5
+
 
     def possible_teams(self, l):
         '''
@@ -153,13 +162,14 @@ class Bayes2(Agent):
         return sum(others) / len(others)
 
     def vote(self, mission, proposer):
-        if self.rnd() == 1 or proposer == self.player_number or self.missions_downvoted() == 4:
+        if self.rnd() == 0 or proposer == self.player_number or self.missions_downvoted() == 4:
             return True
         if self.is_spy():
             if self.missions_succeeded() == 2:
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission) and not self.bad_mission(mission):
-                return random() < self.vote_failable_rate * self.rnd()
+                return self.mission_suspicion(mission) <= \
+                (self.vote_threshold + self.failable_vote_factor * self.rnd()) * self.average_suspicion()
         if self.bad_mission(mission): return False
         return self.mission_suspicion(mission) <= self.vote_threshold * self.average_suspicion()
 
@@ -174,9 +184,9 @@ class Bayes2(Agent):
             if self.missions_failed() == 2 and self.enough_spies(mission): return True
             if self.missions_succeeded() == 2: return True
             elif self.number_of_spies(mission) > self.betrayals_required():
-                return random() < self.risky_betray_rate * self.rnd()
+                return random() < self.risky_betray_rate * (self.rnd()+1)
             elif self.number_of_spies(mission) < self.betrayals_required(): return False
-            else: return random() < self.betray_rate * self.rnd()
+            else: return random() < self.betray_rate * (self.rnd()+1)
         return False # is resistance
 
     def update_suspicions(self):
@@ -194,7 +204,7 @@ class Bayes2(Agent):
     def outcome_probability(self, spies_in_mission, betrayals, betray_rate):
         '''
         Determines the probability of a mission outcome given a world
-        Assume spy always betrays with probability betray_rate in a round
+        Assume spy always betrays with probability betray_rate
         '''
         if spies_in_mission < betrayals: return 0
         p = 1
@@ -203,31 +213,86 @@ class Bayes2(Agent):
         if spies_in_mission > 0: p *= comb(spies_in_mission, betrayals)
         return p
 
+    def vote_probability(self, world, votes_for, spy_vote_fail_rate, spy_vote_success_rate, \
+                         res_vote_fail_rate, res_vote_success_rate, mission_success):
+        '''
+        Determines the probability of voting pattern given a world and a mission outcome
+        '''
+        p = 1
+        for v in votes_for:
+            if v in world:
+                if mission_success: p *= spy_vote_success_rate
+                else: p *= spy_vote_fail_rate
+            else:
+                if mission_success: p *= res_vote_success_rate
+                else: p *= res_vote_fail_rate
+        return p
+
+
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
         Update the last Mission object with mission info
-        Assumes opponent spies betray with probability of
-        self.betray_rate * self.rounds_completed()
+
+        Assumes:
+        spies betray with probability of
+        self.opponent_betray_rate * round number
+
+        res players vote for a failed mission with probability of
+        self.res_vote_failable_rate * round number
+
+        spies vote for a failed mission with probability of
+        self.spy_vote_failable_rate * round number
+
+        spy always votes for a failed mission with probability:
+        0.5 + (self.spy_vote_fail_factor * round number)
+
+        spy always votes for a successful mission with probability:
+        0.5 + (self.spy_vote_success_factor * round number)
+
+        res always votes for a failed mission with probability:
+        0.5 + (self.res_vote_fail_factor * round number)
+
+        res always votes for a successful mission with probability:
+        0.5 + (self.res_vote_success_factor * round number)
         '''
         self.missions[-1].betrayals = betrayals
         self.missions[-1].success = mission_success
         if not mission_success: self.failed_teams.append(mission)
 
-        if len(self.worlds) > 1 and self.rounds_completed() < 5:
-            prob = 0 # overall probability of this mission outcome
-            betray_rate = max(0.05, min(0.95, self.betray_rate * self.rounds_completed()))
+        if len(self.worlds) > 1 and self.rnd() < 4:
+
+            outcome_prob = 0 # overall probability of this mission outcome
+            voting_prob = 0
+
+            betray_rate = max(0.05, min(0.95, self.opponent_betray_rate * (self.rnd()+1)))
+
+            spy_vote_fail_rate = max(0.05, min(0.95, 0.5 + self.spy_vote_fail_factor * (self.rnd()-1)))
+            spy_vote_success_rate = max(0.05, min(0.95, 0.5 + self.spy_vote_success_factor * (self.rnd()-1)))
+            res_vote_fail_rate = max(0.05, min(0.95, 0.5 + self.res_vote_fail_factor * (self.rnd()-1)))
+            res_vote_success_rate = max(0.05, min(0.95, 0.5 + self.res_vote_success_factor * (self.rnd()-1)))
+
             for w, wp in self.worlds.items():
                 spies_in_mission = len([x for x in w if x in mission])
-                prob += self.outcome_probability(spies_in_mission, betrayals, betray_rate) * wp
+                outcome_prob += self.outcome_probability(spies_in_mission, betrayals, betray_rate) * wp
+                voting_prob += self.vote_probability(w, self.missions[-1].votes_for, spy_vote_fail_rate, \
+                    spy_vote_success_rate, res_vote_fail_rate, res_vote_success_rate, mission_success) * wp
             impossible_worlds = []
             for w, wp in self.worlds.items():
+
+                # mission outcome
                 spies_in_mission = len([x for x in w if x in mission])
                 if spies_in_mission == betrayals and len(mission) == betrayals:
                     self.worlds = {w:1}
                     break   
                 self.worlds[w] *= self.outcome_probability(spies_in_mission, betrayals, betray_rate)
-                self.worlds[w] /= prob
+                self.worlds[w] /= outcome_prob
                 if self.worlds[w] == 0: impossible_worlds.append(w)
+
+                # voting patterns
+                self.worlds[w] *= self.vote_probability(w, self.missions[-1].votes_for, spy_vote_fail_rate, \
+                    spy_vote_success_rate, res_vote_fail_rate, res_vote_success_rate, mission_success)
+                self.worlds[w] /= voting_prob
+
             for w in impossible_worlds: self.worlds.pop(w, None)
             self.update_suspicions()
 

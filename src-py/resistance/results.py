@@ -1,11 +1,12 @@
-# from determined_game import Game # first spy_count players in agent list become spies
-from game import Game # spies are randomly assigned
+# from determined_game import Game  # first spy_count players in agent list become spies
+from game import Game               # spies are randomly assigned
 from random_agent import Random
 from baseline import Baseline
 from bayes import Bayes
+from bayes2 import Bayes2
 from random import randrange, choice
 
-class AgentGroup():
+class AgentStats():
     '''
     Collects the stats for each agent class.
     '''
@@ -34,9 +35,9 @@ if __name__ == "__main__":
     Simulates s random games between the agents specified in agents and prints results
     '''
     s = 10000
-    agents = [Random, Bayes]
+    agents = [Bayes, Bayes2]
 
-    agent_groups = [AgentGroup(c) for c in agents]
+    agent_groups = [AgentStats(c) for c in agents]
     for i in range(s):
         n = randrange(5,11)
         game = Game([choice(agents)() for i in range(n)])

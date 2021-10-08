@@ -20,7 +20,7 @@ class Mission:
         self.success = None         # None if no mission carried out, but False
                                     # if this is the fifth aborted mission
 
-class Baseline(Agent):    
+class Bayes(Agent):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.

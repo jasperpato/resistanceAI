@@ -1,5 +1,4 @@
 from agent import Agent
-from random_agent import RandomAgent
 import random
 
 class Game:
@@ -27,7 +26,7 @@ class Game:
         #random.shuffle(self.agents)
         self.num_players = len(agents)
         #allocate spies
-        self.spies = self.agents[:Agent.spy_count[self.num_players]]
+        self.spies = list(range(Agent.spy_count[self.num_players]))
         '''
         while len(self.spies) < Agent.spy_count[self.num_players]:
             spy = random.randrange(self.num_players)

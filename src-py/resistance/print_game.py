@@ -1,6 +1,7 @@
 from agent import Agent
 from human import HumanAgent
 from random_agent import RandomAgent
+from baseline import BaselineAgent
 import random, sys, time
 
 class PrintGame:
@@ -35,13 +36,16 @@ class PrintGame:
         print(f"\nNumber of players: {self.num_players}")
         print(f"Humans: {self.humans}\t" +
         f"AIs: {[i for i in range(self.num_players) if i not in self.humans]}")
-        input("Press enter to show teams for 5 seconds:")
-        print(f"Spies: {sorted(self.spies)}\t" +
-        f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}", end='')
-        sys.stdout.flush()
-        time.sleep(5)
-        sys.stdout.write('\r' + ' ' * 100)
-        sys.stdout.flush()
+        for h in self.humans:
+            input(f"Press enter to show Player {h} info for 5 seconds:")
+            if h in self.spies:
+                print(f"Spies: {sorted(self.spies)}\t" +
+                f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}", end='')
+                sys.stdout.flush()
+                time.sleep(5)
+                sys.stdout.write('\r' + ' ' * 100)
+                sys.stdout.flush()
+            else: print("You are Resistance.")
 
     def play(self):
         leader_id = 0
@@ -123,5 +127,5 @@ class Mission():
     def is_successful(self):
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
-p = PrintGame([RandomAgent() for i in range(6)] + [HumanAgent()])
+p = PrintGame([BaselineAgent() for i in range(6)] + [HumanAgent()])
 p.play()

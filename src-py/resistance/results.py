@@ -4,7 +4,9 @@ from random_agent import Random
 from baseline import Baseline
 from bayes import Bayes
 from bayes2 import Bayes2
+from bayes3 import Bayes3
 from random import randrange, choice
+import sys
 
 class AgentStats():
     '''
@@ -34,11 +36,14 @@ if __name__ == "__main__":
     '''
     Simulates s random games between the agents specified in agents and prints results
     '''
-    s = 4000
-    agents = [Bayes, Bayes2]
+    s = 50000
+    agents = [Random, Baseline, Bayes, Bayes2, Bayes3]
 
     agent_groups = [AgentStats(c) for c in agents]
+    print('\n'+str([a.name for a in agent_groups]))
     for i in range(s):
+        sys.stdout.write(f"\rSimulating game {i+1} / {s}")
+        sys.stdout.flush()
         n = randrange(5,11)
         game = Game([choice(agents)() for i in range(n)])
         game.play()
@@ -53,7 +58,7 @@ if __name__ == "__main__":
             elif game.missions_lost < 3 and j not in game.spies:
                 for a in agent_groups:
                     if isinstance(game.agents[j], a.agent_class): a.res_wins += 1
-    print()
+    print('\n')
     for a in agent_groups:
         print(f"{a.name}: spy wins {a.spy_wins}, spy plays {a.spy_plays}, spy win rate {a.spy_win_rate()}")
         print(f"{a.name}: res wins {a.res_wins}, res plays {a.res_plays}, res win rate {a.res_win_rate()}\n")

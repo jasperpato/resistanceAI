@@ -210,3 +210,12 @@ class Mission():
         raises an exception if the mission is not approved or fails not recorded.
         '''
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
+
+if __name__ == "__main__":
+
+    from baseline import Baseline
+    from bayes import Bayes
+    from bayes3 import Bayes3
+
+    g = Game([Baseline() for i in range(4)] + [Bayes3()])
+    g.play()

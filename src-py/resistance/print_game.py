@@ -1,7 +1,5 @@
 from agent import Agent
 from human import Human
-from bayes2 import Bayes2
-from baseline import Baseline
 import random, sys, time
 
 class PrintGame:
@@ -128,4 +126,6 @@ class Mission():
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
 # if __name__ == "__main__":
-#     PrintGame([Baseline() for i in range(4)] + [Bayes2()]).play()
+#    from bayes2 import Bayes2
+#    from baseline import Baseline
+#    PrintGame([Baseline() for i in range(4)] + [Bayes2()]).play()

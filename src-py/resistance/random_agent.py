@@ -10,7 +10,7 @@ class Random(Agent):
         Nothing to do here.
         '''
         self.name = name
-        self.class_str = "Random"
+        self.class_name = "Random"
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''

@@ -73,20 +73,23 @@ class Bayes3(Agent):
         self.worlds = {w: 1/len(worlds) for w in worlds}
         self.update_suspicions()
 
+        # hard coding behaviour per round
+
         self.vote_threshold          = [1.00, 0.95, 0.90, 0.85, 0.80] # multiplied by average suspicion
-        self.failable_vote_threshold = [1.00, 1.10, 1.20, 1.40, 2.00] # spy vote knowing enough spies on mission
+        self.failable_vote_threshold = [1.00, 1.10, 1.20, 1.40, 2.00] # multiplied by average suspicion
+                                                                      # spy vote knowing enough spies on mission
         
-        self.betray_rate       = [0.20, 0.40, 0.60, 0.80, 1.00] # chance of betraying per round
+        self.betray_rate       = [0.20, 0.40, 0.60, 0.80, 1.00] # chance of betraying
         self.risky_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00] # chance of betraying with more spies on mission
 
-        # opponent modelling
+        # hardcoded opponent modelling per round
 
         self.opponent_betray_rate = self.betray_rate
         
-        self.spy_propose_failed  = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy proposing a failed mission per round
+        self.spy_propose_failed  = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy proposing a failed mission
         self.spy_propose_success = [0.50, 0.40, 0.30, 0.20, 0.05] # chance of spy proposing a successful mission 
         
-        self.spy_vote_failed     = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy voting for a failed mission per round
+        self.spy_vote_failed     = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy voting for a failed mission
         self.spy_vote_success    = [0.50, 0.40, 0.40, 0.30, 0.05] # chance of spy voting for a successful mission
         
         self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]

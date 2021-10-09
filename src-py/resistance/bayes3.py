@@ -86,17 +86,17 @@ class Bayes3(Agent):
 
         self.opponent_betray_rate = self.betray_rate
         
-        self.spy_propose_failed  = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy proposing a failed mission
-        self.spy_propose_success = [0.50, 0.40, 0.30, 0.20, 0.05] # chance of spy proposing a successful mission 
+        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
+        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
         
-        self.spy_vote_failed     = [0.50, 0.60, 0.70, 0.80, 0.95] # chance of spy voting for a failed mission
-        self.spy_vote_success    = [0.50, 0.40, 0.40, 0.30, 0.05] # chance of spy voting for a successful mission
+        self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
+        self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
         
-        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
-        self.res_propose_success = [0.50, 0.50, 0.50, 0.60, 0.70]
+        self.res_propose_failed  = [0.50, 0.50, 0.45, 0.40, 0.30]
+        self.res_propose_success = [0.50, 0.50, 0.55, 0.60, 0.70]
 
-        self.res_vote_failed     = [0.50, 0.50, 0.40, 0.30, 0.10]
-        self.res_vote_success    = [0.50, 0.60, 0.70, 0.80, 0.95]
+        self.res_vote_failed     = [0.50, 0.50, 0.40, 0.20, 0.05]
+        self.res_vote_success    = [0.50, 0.50, 0.60, 0.80, 0.95]
 
     def possible_teams(self, l):
         '''

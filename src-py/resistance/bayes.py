@@ -29,7 +29,7 @@ class Bayes(Agent):
 
     def __init__(self, name='Bayes'):
         self.name = name
-        self.class_str = "Bayes"
+        self.class_name = "Bayes"
 
     def is_spy(self): return self.spies != []
 

@@ -12,7 +12,7 @@ class AgentStats():
     '''
     def __init__(self, agent_class):
         self.agent_class = agent_class
-        self.name = agent_class().class_str
+        self.name = agent_class().class_name
         self.spy_wins = 0
         self.res_wins = 0
         self.spy_plays = 0
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     '''
     Simulates s random games between the agents specified in agents and prints results
     '''
-    s = 10000
+    s = 4000
     agents = [Bayes, Bayes2]
 
     agent_groups = [AgentStats(c) for c in agents]

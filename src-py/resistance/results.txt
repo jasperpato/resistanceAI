@@ -1,0 +1,22 @@
+s = 50000
+agents = [Random, Baseline, Bayes, Bayes2]
+
+Random: spy wins 14824, spy plays 35461, spy win rate 0.41804
+Random: res wins 24613, res plays 58290, res win rate 0.42225
+
+Random: overall win rate 0.42066
+
+Baseline: spy wins 20941, spy plays 35408, spy win rate 0.59142
+Baseline: res wins 24974, res plays 58509, res win rate 0.42684
+
+Baseline: overall win rate 0.48889
+
+Bayes: spy wins 21603, spy plays 35801, spy win rate 0.60342
+Bayes: res wins 27803, res plays 58532, res win rate 0.47501
+
+Bayes: overall win rate 0.52374
+
+Bayes2: spy wins 21289, spy plays 35195, spy win rate 0.60489
+Bayes2: res wins 27680, res plays 58506, res win rate 0.47311
+
+Bayes2: overall win rate 0.52261

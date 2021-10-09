@@ -7,7 +7,7 @@ class Human(Agent):
     '''
     def __init__(self, name="Human"):
         self.name = name
-        self.class_str = "Human"
+        self.class_name = "Human"
 
     def new_game(self, number_of_players, player_number, spies):
         self.number_of_players = number_of_players

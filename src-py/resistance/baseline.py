@@ -26,7 +26,7 @@ class Baseline(Agent):
 
     def __init__(self, name='Baseline'):
         self.name = name
-        self.class_str = "Baseline"
+        self.class_name = "Baseline"
 
     def is_spy(self): return self.spies != []
 

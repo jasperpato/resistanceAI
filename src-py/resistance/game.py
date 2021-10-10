@@ -211,11 +211,13 @@ class Mission():
         '''
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    from baseline import Baseline
-    from bayes import Bayes
-    from bayes3 import Bayes3
+#     from baseline import Baseline
+#     from bayes import Bayes
+#     from bayes3 import Bayes3
+#     from weighted_bayes3 import WeightedBayes3
 
-    g = Game([Baseline() for i in range(4)] + [Bayes3()])
-    g.play()
+#     g = Game([Baseline() for i in range(4)] + [WeightedBayes3(0.2, 0.2)])
+#     g.play()
+#     print(str(g))

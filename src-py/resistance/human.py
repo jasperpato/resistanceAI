@@ -31,8 +31,7 @@ class Human(Agent):
         return team
                 
     def vote(self, mission, proposer):
-        i = input(f"\nPlayer {self.player_number}, vote for leader: {proposer}," + \
-            "team: {mission}?\nInput y or n: ")
+        i = input(f"\nPlayer {self.player_number}, vote for mission? y/n: ")
         if i == 'y': return True
         elif i == 'n': return False
         return self.vote(mission, proposer)

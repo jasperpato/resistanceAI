@@ -1,12 +1,7 @@
 # from determined_game import Game  # first spy_count players in agent list become spies
 from game import Game               # spies are randomly assigned
-from random_agent import Random
-from baseline import Baseline
-from bayes import Bayes
-from bayes2 import Bayes2
-from bayes3 import Bayes3
+import sys, time
 from random import randrange, choice
-import sys
 
 class AgentStats():
     '''
@@ -32,12 +27,11 @@ class AgentStats():
         if self.spy_plays + self.res_plays <= 0: return 0
         else: return round((self.spy_wins + self.res_wins) / (self.spy_plays + self.res_plays), 5)
 
-if __name__ == "__main__":
+def run(s, agents):
     '''
     Simulates s random games between the agents specified in agents and prints results
     '''
-    s = 50000
-    agents = [Random, Baseline, Bayes, Bayes2, Bayes3]
+    t = time.time()
 
     agent_groups = [AgentStats(c) for c in agents]
     print('\n'+str([a.name for a in agent_groups]))
@@ -58,12 +52,25 @@ if __name__ == "__main__":
             elif game.missions_lost < 3 and j not in game.spies:
                 for a in agent_groups:
                     if isinstance(game.agents[j], a.agent_class): a.res_wins += 1
-    print('\n')
+    print(f'\nTime taken {round(time.time()-t,2)} seconds\n')
     for a in agent_groups:
         print(f"{a.name}: spy wins {a.spy_wins}, spy plays {a.spy_plays}, spy win rate {a.spy_win_rate()}")
         print(f"{a.name}: res wins {a.res_wins}, res plays {a.res_plays}, res win rate {a.res_win_rate()}\n")
         print(f"{a.name}: overall win rate {a.win_rate()}\n")
 
+if __name__ == "__main__":
+    from random_agent import Random
+    from baseline import Baseline
+    from bayes import Bayes
+    from bayes2 import Bayes2
+    from bayes3 import Bayes3
 
+    s = 5000
+    agents = [Bayes3, Bayes2, Bayes, Baseline, Random]
+    
+    if len(sys.argv) > 1:
+        s = int(sys.argv[1])
+
+    run(s, agents)
 
 

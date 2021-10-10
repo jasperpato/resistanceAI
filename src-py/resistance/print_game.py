@@ -34,16 +34,24 @@ class PrintGame:
         print(f"\nNumber of players: {self.num_players}")
         print(f"Humans: {self.humans}\t" +
         f"AIs: {[i for i in range(self.num_players) if i not in self.humans]}")
+        
+        print(f"Spies: {self.spies}")
+        
         for h in self.humans:
             input(f"Press enter to show Player {h} info for 5 seconds:")
             if h in self.spies:
                 print(f"Spies: {sorted(self.spies)}\t" +
                 f"Resistance: {sorted([i for i in range(self.num_players) if i not in self.spies])}", end='')
                 sys.stdout.flush()
-                time.sleep(5)
+                time.sleep(3)
                 sys.stdout.write('\r' + ' ' * 100)
                 sys.stdout.flush()
-            else: print("You are Resistance.")
+            else:
+                print("You are Resistance.")
+                sys.stdout.flush()
+                time.sleep(1)
+                sys.stdout.write('\r' + ' ' * 100)
+                sys.stdout.flush()
 
     def play(self):
         leader_id = 0
@@ -59,7 +67,8 @@ class PrintGame:
         for a in self.agents:
             a.game_outcome(self.missions_lost<3, self.spies) 
 
-        print("\nResistance won\n" if self.missions_lost<3 else "Spies won\n") 
+        print("\nResistance won\n" if self.missions_lost<3 else "Spies won\n")
+        print(f"Spies: {self.spies}") 
 
 class Round():
 
@@ -125,7 +134,7 @@ class Mission():
     def is_successful(self):
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
-# if __name__ == "__main__":
-#    from bayes2 import Bayes2
-#    from baseline import Baseline
-#    PrintGame([Baseline() for i in range(4)] + [Bayes2()]).play()
+if __name__ == "__main__":
+   from bayes3 import Bayes3
+   from baseline import Baseline
+   PrintGame([Bayes3() for i in range(4)] + [Human()]).play()

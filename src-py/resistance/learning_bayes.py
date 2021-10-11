@@ -21,16 +21,16 @@ class Mission:
         self.success = None             # None if no mission carried out, but False
                                         # if this is the fifth aborted mission
 
-class GeneticBayes(Bayes3):    
+class LearningBayes(Bayes3):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
     World probabilities are updated on both vote patterns and mission outcomes.
     '''    
 
-    def __init__(self, data, name='GeneticBayes'):
+    def __init__(self, data, name='LearningBayes'):
         self.name = name
-        self.class_name = "GeneticBayes"
+        self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
         self.voting_weight   = 0.6
@@ -92,7 +92,7 @@ class GeneticBayes(Bayes3):
     
     def get_rate(self, vec):
         x = self.successes - self.fails
-        return max(0.05, min(0.8, vec[0] * x ** 2 + vec[1] * x + vec[2]))
+        return max(0.05, min(0.95, vec[0] * x ** 2 + vec[1] * x + vec[2]))
 
     def possible_teams(self, l):
         '''

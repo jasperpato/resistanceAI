@@ -31,8 +31,8 @@ class GeneticBayes(Bayes3):
     def __init__(self, data, name='GeneticBayes'):
         self.name = name
         self.class_name = "GeneticBayes"
-        f = open(data)
-        self.data = json.load(f)
+        f = open ('data.json', "r")
+        self.data = json.loads(f.read())
 
         # outcome weight is 1.0
         self.voting_weight   = 0.6

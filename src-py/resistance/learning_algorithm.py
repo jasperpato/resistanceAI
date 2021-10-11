@@ -77,7 +77,7 @@ if __name__ == "__main__":
     from learning_bayes import LearningBayes
     from bayes3 import Bayes3
 
-    with open('base_data.json') as f:
+    with open('new_data.json') as f:
         data = json.load(f)
 
     s = 900
@@ -114,5 +114,5 @@ if __name__ == "__main__":
             amount = [choice([-increment, increment]) for i in range(3)]
 
             for i in range(3): data[attributes[i]][abc[i]] += amount[i]
-        
+
 

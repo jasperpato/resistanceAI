@@ -26,6 +26,10 @@ class LearningBayes(Bayes3):
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
     World probabilities are updated on both vote patterns and mission outcomes.
+
+    The probabilities P(event | world) are stored in a JSON file in the form [a, b, c]
+    The probability is derived by: P(event | world) = ax^2 + bx + c
+    where x = missions_failed - missions_succeeded
     '''    
 
     def __init__(self, data, name='LearningBayes'):
@@ -33,8 +37,8 @@ class LearningBayes(Bayes3):
         self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
-        self.voting_weight   = 0.6
-        self.proposer_weight = 0.3
+        self.voting_weight   = self.data["vote_weight"]
+        self.proposer_weight = self.data["proposer_weight"]
 
         # hard coding behaviour per round
 
@@ -61,6 +65,8 @@ class LearningBayes(Bayes3):
         self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
+    def rate(self, vec):
+        return min(0.01, max(0.99, vec[0] * self.fails * self.fails + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 

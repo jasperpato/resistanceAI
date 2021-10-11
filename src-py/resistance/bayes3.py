@@ -3,6 +3,8 @@ from random import random
 from itertools import combinations
 from math import comb
 
+#import pymc3
+
 class Mission:
     '''
     Stores game history.
@@ -29,34 +31,6 @@ class Bayes3(Agent):
     def __init__(self, name='Bayes3'):
         self.name = name
         self.class_name = "Bayes3"
-
-    def is_spy(self): return self.spies != []
-
-    def average_suspicion(self):
-        return self.spy_count[self.num_players] / self.num_players
-
-    def betrayals_required(self):
-        return self.fails_required[self.num_players][self.rnd]
-
-    def new_game(self, num_players, player_number, spies):
-        '''
-        initialises the game, spies is empty if player is not a spy
-        '''
-        self.rnd       = 0
-        self.successes = 0
-        self.fails     = 0
-        self.downvotes = 0
-
-        self.num_players = num_players
-        self.player_number = player_number
-        self.num_spies = self.spy_count[self.num_players]
-        self.spies = spies
-        self.missions = []
-        self.failed_teams = [] # teams that betrayed - avoid them
-
-        worlds = list(combinations(range(self.num_players), self.num_spies))
-        self.worlds = {w: 1/len(worlds) for w in worlds}
-        self.update_suspicions()
 
         # outcome weight is 1.0
         self.voting_weight   = 0.4
@@ -86,6 +60,34 @@ class Bayes3(Agent):
         
         self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
+
+    def is_spy(self): return self.spies != []
+
+    def average_suspicion(self):
+        return self.spy_count[self.num_players] / self.num_players
+
+    def betrayals_required(self):
+        return self.fails_required[self.num_players][self.rnd]
+
+    def new_game(self, num_players, player_number, spies):
+        '''
+        initialises the game, spies is empty if player is not a spy
+        '''
+        self.rnd       = 0
+        self.successes = 0
+        self.fails     = 0
+        self.downvotes = 0
+
+        self.num_players = num_players
+        self.player_number = player_number
+        self.num_spies = self.spy_count[self.num_players]
+        self.spies = spies
+        self.missions = []
+        self.failed_teams = [] # teams that betrayed - avoid them
+
+        worlds = list(combinations(range(self.num_players), self.num_spies))
+        self.worlds = {w: 1/len(worlds) for w in worlds}
+        self.update_suspicions()
 
     def possible_teams(self, l):
         '''

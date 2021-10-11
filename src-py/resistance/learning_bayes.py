@@ -21,7 +21,7 @@ class Mission:
         self.success = None             # None if no mission carried out, but False
                                         # if this is the fifth aborted mission
 
-class GeneticBayes(Bayes3):    
+class LearningBayes(Bayes3):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
@@ -32,10 +32,9 @@ class GeneticBayes(Bayes3):
     where x = missions_failed - missions_succeeded
     '''    
 
-    def __init__(self, data, name='GeneticBayes'):
+    def __init__(self, data, name='LearningBayes'):
         self.name = name
-        self.class_name = "GeneticBayes"
-        self.data = json.load(data)
+        self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
         self.voting_weight   = self.data["vote_weight"]
@@ -43,28 +42,28 @@ class GeneticBayes(Bayes3):
 
         # hard coding behaviour per round
 
-        self.vote_threshold          = self.data["vote_threshold"] # multiplied by average suspicion
-        self.failable_vote_threshold = self.data["failable_vote_threshold"] # multiplied by average suspicion
+        self.vote_threshold          = data["vote_threshold"] # multiplied by average suspicion
+        self.failable_vote_threshold = data["failable_vote_threshold"] # multiplied by average suspicion
                                                                       # spy vote knowing enough spies on mission
         
-        self.betray_rate       = self.data["betray_rate"] # chance of betraying
-        self.risky_betray_rate = [self.data["risky_betray_rate"]] # chance of betraying with more spies on mission
+        self.betray_rate       = data["betray_rate"] # chance of betraying
+        self.risky_betray_rate = data["risky_betray_rate"] # chance of betraying with more spies on mission
 
-        # hardcoded opponent modelling per round
+        # opponent modelling per round
 
-        self.opponent_betray_rate = self.data["opponent_betray_rate"]
+        self.opponent_betray_rate = data["opponent_betray_rate"]
         
-        self.spy_propose_failed  = self.data["spy_propose_failed"] # chance of spy proposing a failed mission
-        self.spy_propose_success = self.data["spy_propose_success"] # chance of spy proposing a successful mission 
-        
-        self.spy_vote_failed     = self.data["spy_vote_failed"] # chance of spy voting for a failed mission
-        self.spy_vote_success    = self.data["spy_vote_success"] # chance of spy voting for a successful mission
-        
-        self.res_propose_failed  = self.data["res_propose_failed"]
-        self.res_propose_success = self.data["res_propose_success"]
+        self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
+        self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
 
-        self.res_vote_failed     = self.data["res_vote_failed"]
-        self.res_vote_success    = self.data["res_vote_success"]
+        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
+        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
+
+        self.res_vote_failed     = [0.50, 0.45, 0.40, 0.20, 0.05]
+        self.res_vote_success    = [0.50, 0.55, 0.60, 0.80, 0.95]
+        
+        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
+        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def rate(self, vec):
         return min(0.01, max(0.99, vec[0] * self.fails * self.fails + vec[1] * self.fails + vec[2]))
@@ -96,6 +95,10 @@ class GeneticBayes(Bayes3):
         worlds = list(combinations(range(self.num_players), self.num_spies))
         self.worlds = {w: 1/len(worlds) for w in worlds}
         self.update_suspicions()
+    
+    def get_rate(self, vec):
+        x = self.successes - self.fails
+        return max(0.05, min(0.95, vec[0] * x ** 2 + vec[1] * x + vec[2]))
 
     def possible_teams(self, l):
         '''
@@ -172,12 +175,12 @@ class GeneticBayes(Bayes3):
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission) and not self.bad_mission(mission):
                 return self.mission_suspicion(mission) <= \
-                    self.failable_vote_threshold[self.rnd] * self.average_suspicion()
+                    self.get_rate(self.failable_vote_threshold) * self.average_suspicion()
         if self.bad_mission(mission): return False
         if self.player_number not in mission and \
             len(mission) >= self.num_players - self.num_spies: return False
         return self.mission_suspicion(mission) <= \
-            self.vote_threshold[self.rnd] * self.average_suspicion()
+            self.get_rate(self.vote_threshold) * self.average_suspicion()
 
     def vote_outcome(self, mission, proposer, votes):
         '''
@@ -192,9 +195,9 @@ class GeneticBayes(Bayes3):
             if self.fails == 2 and self.enough_spies(mission): return True
             if self.successes == 2: return True
             elif self.num_spies_in(mission) > self.betrayals_required():
-                return random() < self.risky_betray_rate[self.rnd]
+                return random() < self.get_rate(self.risky_betray_rate)
             elif self.num_spies_in(mission) < self.betrayals_required(): return False
-            else: return random() < self.betray_rate[self.rnd]
+            else: return random() < self.get_rate(self.betray_rate)
         return False # is resistance
 
     def update_suspicions(self):
@@ -261,7 +264,7 @@ class GeneticBayes(Bayes3):
 
         if len(self.worlds) > 1 and self.rnd < 4:
 
-            br = self.opponent_betray_rate[self.rnd]
+            br = self.get_rate(self.opponent_betray_rate)
 
             vsf = self.spy_vote_failed[self.rnd]
             vss = self.spy_vote_success[self.rnd]

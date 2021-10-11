@@ -2,8 +2,7 @@
 from game import Game               # spies are randomly assigned
 import sys, time
 from random import randrange, choice
-
-
+import json
 
 class AgentStats():
     '''
@@ -11,7 +10,8 @@ class AgentStats():
     '''
     def __init__(self, agent_class):
         self.agent_class = agent_class
-        self.name = agent_class().class_name
+        if agent_class is LearningBayes: self.name = "LearningBayes"
+        else : self.name = agent_class().class_name
         self.spy_wins = 0
         self.res_wins = 0
         self.spy_plays = 0
@@ -29,11 +29,15 @@ class AgentStats():
         if self.spy_plays + self.res_plays <= 0: return 0
         else: return round((self.spy_wins + self.res_wins) / (self.spy_plays + self.res_plays), 5)
 
-def fitness_func(s, agents):
+def fitness_function(s, agents):
     '''
     Simulates s random games between the agents specified in agents and prints results
+    Returns True if GeneticBayes win rate improved, False otherwise
     '''
     t = time.time()
+
+    with open ('data.json') as f:
+            data = json.load(f)
 
     agent_groups = [AgentStats(c) for c in agents]
     print('\n'+str([a.name for a in agent_groups]))
@@ -41,7 +45,12 @@ def fitness_func(s, agents):
         sys.stdout.write(f"\rSimulating game {i+1} / {s}")
         sys.stdout.flush()
         n = randrange(5,11)
-        game = Game([choice(agents)() for i in range(n)])
+        players = []
+        for i in range(n):
+            player = choice(agents)
+            if player is LearningBayes: players.append(player(data))
+            else : players.append(player())
+        game = Game(players)
         game.play()
         for j in range(n): 
             for a in agent_groups:
@@ -56,22 +65,31 @@ def fitness_func(s, agents):
                     if isinstance(game.agents[j], a.agent_class): a.res_wins += 1
     
     print(f'\nTime taken {round(time.time()-t,2)} seconds\n')
+    genetic_win_rate = 0
     for a in agent_groups:
         print(f"{a.name}: spy wins {a.spy_wins}, spy plays {a.spy_plays}, spy win rate {a.spy_win_rate()}")
         print(f"{a.name}: res wins {a.res_wins}, res plays {a.res_plays}, res win rate {a.res_win_rate()}\n")
         print(f"{a.name}: overall win rate {a.win_rate()}\n")
+        if a.name == "LearningBayes": learner_win_rate = a.win_rate()
+    
+    return learner_win_rate
+
+'''def mutator:
+    with open("new_data.json", 'w') as f:
+        json.dump(data, f, indent=2)'''
 
 if __name__ == "__main__":
     from random_agent import Random
     from baseline import Baseline
-    from genetic_bayes import GeneticBayes
+    from learning_bayes import LearningBayes
+    from bayes3 import Bayes3
 
-    s = 50
-    agents = [GeneticBayes]
+    s = 1000
+    agents = [LearningBayes, Baseline, Random]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    fitness_func(s, agents)
+    fitness_function(s, agents)
 
 

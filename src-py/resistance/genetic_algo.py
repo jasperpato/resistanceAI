@@ -2,8 +2,7 @@
 from game import Game               # spies are randomly assigned
 import sys, time
 from random import randrange, choice
-
-
+import json
 
 class AgentStats():
     '''

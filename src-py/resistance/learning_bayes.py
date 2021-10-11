@@ -37,7 +37,7 @@ class LearningBayes(Bayes3):
         self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
-        self.voting_weight   = 0.4
+        self.vote_weight   = 0.4
         self.proposer_weight = 0.3
 
         # hard coding behaviour per round
@@ -299,7 +299,7 @@ class LearningBayes(Bayes3):
             for w in self.worlds.keys():
                 new_p = self.vote_probability(w, self.missions[-1].votes_for, vsf, vss, vrf, vrs, mission_success) \
                     * self.worlds[w] / voting_prob
-                self.worlds[w] = self.voting_weight * new_p + (1-self.voting_weight) * self.worlds[w]
+                self.worlds[w] = self.vote_weight * new_p + (1-self.vote_weight) * self.worlds[w]
 
             proposer_prob = 0  # overall probability of a proposer given mission outcome    
             for w, wp in self.worlds.items():    

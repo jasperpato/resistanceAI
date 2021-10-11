@@ -32,7 +32,6 @@ class AgentStats():
 def fitness_function(s, agents):
     '''
     Simulates s random games between the agents specified in agents and prints results
-    Returns True if GeneticBayes win rate improved, False otherwise
     '''
     t = time.time()
 
@@ -74,9 +73,9 @@ def fitness_function(s, agents):
     
     return learner_win_rate
 
-'''def mutator:
+def mutator(data):
     with open("new_data.json", 'w') as f:
-        json.dump(data, f, indent=2)'''
+        json.dump(data, f, indent=2)
 
 if __name__ == "__main__":
     from random_agent import Random
@@ -84,12 +83,13 @@ if __name__ == "__main__":
     from learning_bayes import LearningBayes
     from bayes3 import Bayes3
 
-    s = 1000
+    s = 20
     agents = [LearningBayes, Baseline, Random]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    fitness_function(s, agents)
+    for i in range(20):
+        fitness_function(s, agents)
 
 

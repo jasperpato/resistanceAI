@@ -7,7 +7,7 @@ class Mission:
     '''
     Stores game history.
     A Mission is either: [team proposition + vote]             (aborted)
-    or: [team proposition + vote + outcome]   (carried out)
+                     or: [team proposition + vote + outcome]   (carried out)
     '''
     def __init__(self, num_players, rnd, proposer, team, votes_for):
         self.num_players = num_players
@@ -23,7 +23,7 @@ class Bayes3(Agent):
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
-    World probabilities are updated on both vote patterns and mission outcomes.
+    Probabilities are based on mission outcome, voting pattern and proposer.
     '''    
 
     def __init__(self, name='Bayes3'):
@@ -59,7 +59,7 @@ class Bayes3(Agent):
         self.update_suspicions()
 
         # outcome weight is 1.0
-        self.voting_weight   = 0.6
+        self.voting_weight   = 0.4
         self.proposer_weight = 0.3
 
         # hard coding behaviour per round
@@ -74,18 +74,18 @@ class Bayes3(Agent):
         # hardcoded opponent modelling per round
 
         self.opponent_betray_rate = self.betray_rate
-        
-        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
-        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
-        
+              
         self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
         self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
-        
-        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
-        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
+
+        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
+        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
 
         self.res_vote_failed     = [0.50, 0.45, 0.40, 0.20, 0.05]
         self.res_vote_success    = [0.50, 0.55, 0.60, 0.80, 0.95]
+        
+        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
+        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def possible_teams(self, l):
         '''
@@ -168,6 +168,8 @@ class Bayes3(Agent):
             len(mission) >= self.num_players - self.num_spies: return False
         return self.mission_suspicion(mission) <= \
             self.vote_threshold[self.rnd] * self.average_suspicion()
+        # also, downvote if there are betrayals_required players in mission with too high suspicion
+        # maybe this is the only requirement
 
     def vote_outcome(self, mission, proposer, votes):
         '''

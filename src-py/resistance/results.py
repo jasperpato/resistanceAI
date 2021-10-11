@@ -39,7 +39,7 @@ def run(s, agents):
         sys.stdout.write(f"\rSimulating game {i+1} / {s}")
         sys.stdout.flush()
         n = randrange(5,11)
-        game = Game([choice(agents)() for i in range(n)])
+        game = Game([choice(agents)() for j in range(n)])
         game.play()
         for j in range(n): 
             for a in agent_groups:
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
 
     s = 5000
-    agents = [Bayes3, Bayes2, Bayes, Baseline, Random]
+    agents = [Bayes3, Baseline]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])

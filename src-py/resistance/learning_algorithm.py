@@ -35,7 +35,7 @@ def fitness_function(s, agents):
     '''
     t = time.time()
 
-    with open ('data.json') as f:
+    with open ('base_data.json') as f:
             data = json.load(f)
 
     agent_groups = [AgentStats(c) for c in agents]
@@ -83,13 +83,17 @@ if __name__ == "__main__":
     from learning_bayes import LearningBayes
     from bayes3 import Bayes3
 
-    s = 20
+    s = 200
     agents = [LearningBayes, Baseline, Random]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    for i in range(20):
-        fitness_function(s, agents)
+    current_win_rate = 0
+    for i in range(1):
+        new_win_rate = fitness_function(s, agents)
+        if current_win_rate < new_win_rate:
+            #learn some stuff
+            pass
 
 

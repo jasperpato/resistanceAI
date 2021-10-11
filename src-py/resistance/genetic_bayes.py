@@ -26,6 +26,10 @@ class GeneticBayes(Bayes3):
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
     World probabilities are updated on both vote patterns and mission outcomes.
+
+    The probabilities P(event | world) are stored in a JSON file in the form [a, b, c]
+    The probability is derived by: P(event | world) = ax^2 + bx + c
+    where x = missions_failed - missions_succeeded
     '''    
 
     def __init__(self, data, name='GeneticBayes'):

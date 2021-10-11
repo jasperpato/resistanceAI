@@ -79,8 +79,8 @@ if __name__ == "__main__":
     from genetic_bayes import GeneticBayes
     from bayes3 import Bayes3
 
-    s = 1
-    agents = [Bayes3, Baseline,GeneticBayes]
+    s = 1000
+    agents = [GeneticBayes]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])

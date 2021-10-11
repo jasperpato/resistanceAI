@@ -31,7 +31,6 @@ class GeneticBayes(Bayes3):
     def __init__(self, data, name='GeneticBayes'):
         self.name = name
         self.class_name = "GeneticBayes"
-        self.data = data
 
         # outcome weight is 1.0
         self.voting_weight   = 0.6
@@ -39,16 +38,16 @@ class GeneticBayes(Bayes3):
 
         # hard coding behaviour per round
 
-        self.vote_threshold          = self.data["vote_threshold"] # multiplied by average suspicion
-        self.failable_vote_threshold = self.data["failable_vote_threshold"] # multiplied by average suspicion
+        self.vote_threshold          = data["vote_threshold"] # multiplied by average suspicion
+        self.failable_vote_threshold = data["failable_vote_threshold"] # multiplied by average suspicion
                                                                       # spy vote knowing enough spies on mission
         
-        self.betray_rate       = self.data["betray_rate"] # chance of betraying
-        self.risky_betray_rate = self.data["risky_betray_rate"] # chance of betraying with more spies on mission
+        self.betray_rate       = data["betray_rate"] # chance of betraying
+        self.risky_betray_rate = data["risky_betray_rate"] # chance of betraying with more spies on mission
 
         # opponent modelling per round
 
-        self.opponent_betray_rate = self.data["opponent_betray_rate"]
+        self.opponent_betray_rate = data["opponent_betray_rate"]
         
         self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
         self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
@@ -93,7 +92,7 @@ class GeneticBayes(Bayes3):
     
     def get_rate(self, vec):
         x = self.successes - self.fails
-        return vec[0] * x ** 2 + vec[1] * x + vec[2]
+        return max(0.05, min(0.8, vec[0] * x ** 2 + vec[1] * x + vec[2]))
 
     def possible_teams(self, l):
         '''

@@ -10,7 +10,8 @@ class AgentStats():
     '''
     def __init__(self, agent_class):
         self.agent_class = agent_class
-        self.name = agent_class().class_name
+        if agent_class is GeneticBayes: self.name = "GeneticBayes"
+        else : self.name = agent_class().class_name
         self.spy_wins = 0
         self.res_wins = 0
         self.spy_plays = 0
@@ -43,7 +44,7 @@ def fitness_func(s, agents):
         players = []
         for i in range(n):
             player = choice(agents)
-            if player is GeneticBayes: players.append(player("data.json"))
+            if player is GeneticBayes: players.append(player("./data.json"))
             else : players.append(player())
         game = Game(players)
         game.play()

@@ -40,7 +40,12 @@ def fitness_func(s, agents):
         sys.stdout.write(f"\rSimulating game {i+1} / {s}")
         sys.stdout.flush()
         n = randrange(5,11)
-        game = Game([choice(agents)() for i in range(n)])
+        players = []
+        for i in range(n):
+            player = choice(agents)
+            if player is GeneticBayes: players.append(player("data.json"))
+            else : players.append(player())
+        game = Game(players)
         game.play()
         for j in range(n): 
             for a in agent_groups:
@@ -64,9 +69,10 @@ if __name__ == "__main__":
     from random_agent import Random
     from baseline import Baseline
     from genetic_bayes import GeneticBayes
+    from bayes3 import Bayes3
 
-    s = 50
-    agents = [GeneticBayes]
+    s = 1
+    agents = [Bayes3, Baseline]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])

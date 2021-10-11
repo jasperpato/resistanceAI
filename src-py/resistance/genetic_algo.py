@@ -35,6 +35,9 @@ def fitness_func(s, agents):
     '''
     t = time.time()
 
+    with open ('data.json') as f:
+            data = json.load(f)
+
     agent_groups = [AgentStats(c) for c in agents]
     print('\n'+str([a.name for a in agent_groups]))
     for i in range(s):
@@ -44,7 +47,7 @@ def fitness_func(s, agents):
         players = []
         for i in range(n):
             player = choice(agents)
-            if player is GeneticBayes: players.append(player("./data.json"))
+            if player is GeneticBayes: players.append(player(data))
             else : players.append(player())
         game = Game(players)
         game.play()
@@ -66,6 +69,10 @@ def fitness_func(s, agents):
         print(f"{a.name}: res wins {a.res_wins}, res plays {a.res_plays}, res win rate {a.res_win_rate()}\n")
         print(f"{a.name}: overall win rate {a.win_rate()}\n")
 
+'''def mutator:
+    with open("new_data.json", 'w') as f:
+        json.dump(data, f, indent=2)'''
+
 if __name__ == "__main__":
     from random_agent import Random
     from baseline import Baseline
@@ -73,7 +80,7 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
 
     s = 1
-    agents = [Bayes3, Baseline]
+    agents = [Bayes3, Baseline,GeneticBayes]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])

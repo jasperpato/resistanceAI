@@ -31,8 +31,7 @@ class GeneticBayes(Bayes3):
     def __init__(self, data, name='GeneticBayes'):
         self.name = name
         self.class_name = "GeneticBayes"
-        with open ('data.json') as f:
-            self.data = json.load(f)
+        self.data = data
 
         # outcome weight is 1.0
         self.voting_weight   = 0.6
@@ -47,7 +46,7 @@ class GeneticBayes(Bayes3):
         self.betray_rate       = self.data["betray_rate"] # chance of betraying
         self.risky_betray_rate = self.data["risky_betray_rate"] # chance of betraying with more spies on mission
 
-        # hardcoded opponent modelling per round
+        # opponent modelling per round
 
         self.opponent_betray_rate = self.data["opponent_betray_rate"]
         

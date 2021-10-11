@@ -1,12 +1,9 @@
 {
-    "vote_weight":             [ 0.00,  0.00,  0.40 ],
-    "proposer_weight":         [ 0.00,  0.00,  0.30 ],
+    "vote_threshold":          [-0.025, -0.025,  1.050 ],
+    "failable_vote_threshold": [ 0.050,  0.050,  1.100 ],
     
-    "vote_threshold":          [ 0.00, -0.05,  1.05 ],
-    "failable_vote_threshold": [ 0.00,  0.05,  1.10 ],
+    "betray_rate":             [ 0.100,  0.100,  0.200 ],
+    "risky_betray_rate":       [ 0.075,  0.075,  0.150 ],
     
-    "betray_rate":             [ 0.00,  0.20,  0.20 ],
-    "risky_betray_rate":       [ 0.00,  0.15,  0.15 ],
-    
-    "opponent_betray_rate":    [ 0.00,  0.20,  0.20 ]
+    "opponent_betray_rate":    [ 0.100,  0.100,  0.200 ]
 }

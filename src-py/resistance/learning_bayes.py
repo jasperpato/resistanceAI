@@ -37,8 +37,8 @@ class LearningBayes(Bayes3):
         self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
-        self.voting_weight   = data["vote_weight"]
-        self.proposer_weight = data["proposer_weight"]
+        self.voting_weight   = 0.4
+        self.proposer_weight = 0.3
 
         # hard coding behaviour per round
 
@@ -66,7 +66,7 @@ class LearningBayes(Bayes3):
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def rate(self, vec):
-        return min(0.01, max(0.99, vec[0] * self.fails * self.fails + vec[1] * self.fails + vec[2]))
+        return min(0.001, max(0.999, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 
@@ -299,7 +299,7 @@ class LearningBayes(Bayes3):
             for w in self.worlds.keys():
                 new_p = self.vote_probability(w, self.missions[-1].votes_for, vsf, vss, vrf, vrs, mission_success) \
                     * self.worlds[w] / voting_prob
-                self.worlds[w] = self.rate(self.voting_weight) * new_p + (1-self.rate(self.voting_weight)) * self.worlds[w]
+                self.worlds[w] = self.voting_weight * new_p + (1-self.voting_weight) * self.worlds[w]
 
             proposer_prob = 0  # overall probability of a proposer given mission outcome    
             for w, wp in self.worlds.items():    
@@ -308,7 +308,7 @@ class LearningBayes(Bayes3):
             for w in self.worlds.keys(): 
                 new_p = self.proposer_probability(w, proposer, psf, pss, prf, prs, mission_success) \
                     * self.worlds[w] / proposer_prob
-                self.worlds[w] = self.rate(self.proposer_weight) * new_p + (1-self.rate(self.proposer_weight)) * self.worlds[w]
+                self.worlds[w] = self.proposer_weight * new_p + (1-self.proposer_weight) * self.worlds[w]
 
             self.update_suspicions()
 

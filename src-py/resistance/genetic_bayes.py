@@ -3,6 +3,7 @@ from random import random
 from bayes3 import Bayes3
 from itertools import combinations
 from math import comb
+import json
 
 class Mission:
     '''
@@ -30,6 +31,7 @@ class GeneticBayes(Bayes3):
     def __init__(self, data, name='GeneticBayes'):
         self.name = name
         self.class_name = "GeneticBayes"
+        self.data = json.load(data)
 
         # outcome weight is 1.0
         self.voting_weight   = 0.6
@@ -37,28 +39,28 @@ class GeneticBayes(Bayes3):
 
         # hard coding behaviour per round
 
-        self.vote_threshold          = [1.05, 1.05, 1.00, 0.95, 0.80] # multiplied by average suspicion
-        self.failable_vote_threshold = [1.10, 1.10, 1.20, 1.40, 2.00] # multiplied by average suspicion
+        self.vote_threshold          = self.data["vote_threshold"] # multiplied by average suspicion
+        self.failable_vote_threshold = self.data["failable_vote_threshold"] # multiplied by average suspicion
                                                                       # spy vote knowing enough spies on mission
         
-        self.betray_rate       = [0.20, 0.40, 0.60, 0.80, 1.00] # chance of betraying
-        self.risky_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00] # chance of betraying with more spies on mission
+        self.betray_rate       = self.data["betray_rate"] # chance of betraying
+        self.risky_betray_rate = [self.data["risky_betray_rate"] # chance of betraying with more spies on mission
 
         # hardcoded opponent modelling per round
 
-        self.opponent_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00]
+        self.opponent_betray_rate = self.data["opponent_betray_rate"]
         
-        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
-        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
+        self.spy_propose_failed  = self.data["spy_propose_failed"] # chance of spy proposing a failed mission
+        self.spy_propose_success = self.data["spy_propose_success"] # chance of spy proposing a successful mission 
         
-        self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
-        self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
+        self.spy_vote_failed     = self.data["spy_vote_failed"] # chance of spy voting for a failed mission
+        self.spy_vote_success    = self.data["spy_vote_success"] # chance of spy voting for a successful mission
         
-        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
-        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
+        self.res_propose_failed  = self.data["res_propose_failed"]
+        self.res_propose_success = self.data["res_propose_success"]
 
-        self.res_vote_failed     = [0.50, 0.45, 0.40, 0.20, 0.05]
-        self.res_vote_success    = [0.50, 0.55, 0.60, 0.80, 0.95]
+        self.res_vote_failed     = self.data["res_vote_failed"]
+        self.res_vote_success    = self.data["res_vote_success"]
 
 
     def is_spy(self): return self.spies != []

@@ -80,39 +80,46 @@ if __name__ == "__main__":
     with open('new_data.json') as f:
         data = json.load(f)
 
-    s = 900
-    increment = 0.001
+    trials = 10
+    games = 5000
+    changes = 3
+    increment = 0.005
     agents = [LearningBayes, Bayes3]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    old_win_rate = 0
+    old_win_rate = data["old_win_rate"]
     
-    attributes = sample(list(data.keys()), 3)
-    abc = [randrange(3) for i in range(3)]
+    keys = list(data.keys())
+    keys.remove("win_rate")
+    attributes = sample(keys, changes)
+
+    abc = [randrange(changes) for i in range(changes)]
     amount = [choice([-increment, increment]) for i in range(3)]
 
-    for i in range(10):
+    for i in range(trials):
+
         new_win_rate = fitness_function(s, agents, data)
         
         if new_win_rate > old_win_rate:
             print("IMPROVED")
             with open("old_data.json", 'w') as f: json.dump(data, f, indent=1)
-            for i in range(3): data[attributes[i]][abc[i]] += amount[i]
+            for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
+            data["win_rate"] = new_win_rate
             with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
 
-            old_win_rate = new_win_rate
+            old_win_rate = new_win_rate        
         
         else:
             print("WORSENED")
             with open('old_data.json') as f: data = json.load(f)
             with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
 
-            attributes = sample(list(data.keys()), 3)
-            abc = [randrange(3) for i in range(3)]
-            amount = [choice([-increment, increment]) for i in range(3)]
+            attributes = sample(keys, changes)
+            abc = [randrange(changes) for i in range(changes)]
+            amount = [choice([-increment, increment]) for i in range(changes)]
 
-            for i in range(3): data[attributes[i]][abc[i]] += amount[i]
+            for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
 
 

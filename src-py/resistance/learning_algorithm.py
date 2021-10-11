@@ -97,9 +97,9 @@ if __name__ == "__main__":
         new_win_rate = fitness_function(s, agents, data)
         
         if new_win_rate > current_win_rate:
+            with open("old_data.json", 'w') as f: json.dump(data, f, indent=1)
             for i in range(3): data[attributes[i]][abc[i]] += amount[i]
             with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
-            with open("old_data.json", 'w') as f: json.dump(data, f, indent=1)
         
         else:
             with open('old_data.json') as f: data = json.load(f)
@@ -108,4 +108,5 @@ if __name__ == "__main__":
             attributes = sample(list(data.keys()), 3)
             abc = [randrange(3) for i in range(3)]
             amount = [choice([-increment, increment]) for i in range(3)]
+            for i in range(3): data[attributes[i]][abc[i]] += amount[i]
 

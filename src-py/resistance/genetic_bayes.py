@@ -1,5 +1,6 @@
 from agent import Agent
 from random import random
+from bayes3 import Bayes3
 from itertools import combinations
 from math import comb
 
@@ -19,16 +20,46 @@ class Mission:
         self.success = None             # None if no mission carried out, but False
                                         # if this is the fifth aborted mission
 
-class GeneticBayes(Agent):    
+class GeneticBayes(Bayes3):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
     World probabilities are updated on both vote patterns and mission outcomes.
     '''    
 
-    def __init__(self, name='GeneticBayes'):
+    def __init__(self, data, name='GeneticBayes'):
         self.name = name
         self.class_name = "GeneticBayes"
+
+        # outcome weight is 1.0
+        self.voting_weight   = 0.6
+        self.proposer_weight = 0.3
+
+        # hard coding behaviour per round
+
+        self.vote_threshold          = [1.05, 1.05, 1.00, 0.95, 0.80] # multiplied by average suspicion
+        self.failable_vote_threshold = [1.10, 1.10, 1.20, 1.40, 2.00] # multiplied by average suspicion
+                                                                      # spy vote knowing enough spies on mission
+        
+        self.betray_rate       = [0.20, 0.40, 0.60, 0.80, 1.00] # chance of betraying
+        self.risky_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00] # chance of betraying with more spies on mission
+
+        # hardcoded opponent modelling per round
+
+        self.opponent_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00]
+        
+        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
+        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
+        
+        self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
+        self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
+        
+        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
+        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
+
+        self.res_vote_failed     = [0.50, 0.45, 0.40, 0.20, 0.05]
+        self.res_vote_success    = [0.50, 0.55, 0.60, 0.80, 0.95]
+
 
     def is_spy(self): return self.spies != []
 
@@ -57,23 +88,6 @@ class GeneticBayes(Agent):
         worlds = list(combinations(range(self.num_players), self.num_spies))
         self.worlds = {w: 1/len(worlds) for w in worlds}
         self.update_suspicions()
-
-        # outcome weight is 1.0
-        self.voting_weight   = 0.6
-        self.proposer_weight = 0.3
-
-        # hard coding behaviour per round
-
-        self.vote_threshold          = [1.05, 1.05, 1.00, 0.95, 0.80] # multiplied by average suspicion
-        self.failable_vote_threshold = [1.10, 1.10, 1.20, 1.40, 2.00] # multiplied by average suspicion
-                                                                      # spy vote knowing enough spies on mission
-        
-        self.betray_rate       = [0.20, 0.40, 0.60, 0.80, 1.00] # chance of betraying
-        self.risky_betray_rate = [0.15, 0.30, 0.45, 0.60, 1.00] # chance of betraying with more spies on mission
-
-        # hardcoded opponent modelling per round
-
-        self.opponent_betray_rate = self.betray_rate
 
     def possible_teams(self, l):
         '''
@@ -199,6 +213,35 @@ class GeneticBayes(Agent):
         return betray_rate ** betrayals * (1-betray_rate) ** (spies_in_mission-betrayals) \
                 * comb(spies_in_mission, betrayals)
 
+    def vote_probability(self, world, votes_for, sf, ss, rf, rs, mission_success):
+        '''
+        Probability of a voting pattern for a mission outcome given a world
+        '''
+        p = 1
+        for x in range(self.num_players):
+            if x in world and x in votes_for:
+                if mission_success: p *= ss
+                else: p *= sf
+            elif x in world and x not in votes_for:
+                if mission_success: p *= (1-ss)
+                else: p *= (1-sf)
+            elif x not in world and x in votes_for:
+                if mission_success: p *= rs
+                else: p *= rf
+            elif x not in world and x not in votes_for:
+                if mission_success: p *= (1-rs)
+                else: p *= (1-rf)
+        return p
+
+    def proposer_probability(self, world, proposer, sf, ss, rf, rs, mission_success):
+        '''
+        Probability of proposer causing a mission outcome given a world
+        '''
+        if proposer in world and mission_success: return ss
+        elif proposer in world and not mission_success: return sf
+        elif proposer not in world and mission_success: return rs
+        elif proposer not in world and not mission_success: return rf
+
     def mission_outcome(self, mission, proposer, betrayals, mission_success):
         '''
         Update the last Mission object with mission info
@@ -211,6 +254,16 @@ class GeneticBayes(Agent):
         if len(self.worlds) > 1 and self.rnd < 4:
 
             br = self.opponent_betray_rate[self.rnd]
+
+            vsf = self.spy_vote_failed[self.rnd]
+            vss = self.spy_vote_success[self.rnd]
+            vrf = self.res_vote_failed[self.rnd]
+            vrs = self.res_vote_success[self.rnd]
+
+            psf = self.spy_propose_failed[self.rnd]
+            pss = self.spy_propose_success[self.rnd]
+            prf = self.res_propose_failed[self.rnd]
+            prs = self.res_propose_success[self.rnd]
 
             outcome_prob = 0  # overall probability of this mission outcome
             for w, wp in self.worlds.items():
@@ -226,6 +279,25 @@ class GeneticBayes(Agent):
                 self.worlds[w] *= self.outcome_probability(spies_in_mission, betrayals, br) / outcome_prob
                 if self.worlds[w] == 0: impossible_worlds.append(w) 
             for w in impossible_worlds: self.worlds.pop(w, None)
+            
+            voting_prob = 0  # overall probability of a voting pattern given mission outcome
+            for w, wp in self.worlds.items():    
+                voting_prob += self.vote_probability(w, self.missions[-1].votes_for, \
+                    vsf, vss, vrf, vrs, mission_success) * wp
+            
+            for w in self.worlds.keys():
+                new_p = self.vote_probability(w, self.missions[-1].votes_for, vsf, vss, vrf, vrs, mission_success) \
+                    * self.worlds[w] / voting_prob
+                self.worlds[w] = self.voting_weight * new_p + (1-self.voting_weight) * self.worlds[w]
+
+            proposer_prob = 0  # overall probability of a proposer given mission outcome    
+            for w, wp in self.worlds.items():    
+                proposer_prob += self.proposer_probability(w, proposer, psf, pss, prf, prs, mission_success) * wp
+            
+            for w in self.worlds.keys(): 
+                new_p = self.proposer_probability(w, proposer, psf, pss, prf, prs, mission_success) \
+                    * self.worlds[w] / proposer_prob
+                self.worlds[w] = self.proposer_weight * new_p + (1-self.proposer_weight) * self.worlds[w]
 
             self.update_suspicions()
 

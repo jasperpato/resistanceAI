@@ -1,7 +1,7 @@
 # from determined_game import Game  # first spy_count players in agent list become spies
 from game import Game               # spies are randomly assigned
 import sys, time
-from random import randrange, choice
+from random import randrange, choice, random, sample, uniform
 import json
 
 class AgentStats():
@@ -29,13 +29,11 @@ class AgentStats():
         if self.spy_plays + self.res_plays <= 0: return 0
         else: return round((self.spy_wins + self.res_wins) / (self.spy_plays + self.res_plays), 5)
 
-def fitness_function(s, agents):
+def fitness_function(s, agents, data):
     '''
     Simulates s random games between the agents specified in agents and prints results
     '''
     t = time.time()
-
-    with open ('base_data.json') as f: data = json.load(f)
 
     agent_groups = [AgentStats(c) for c in agents]
     print('\n'+str([a.name for a in agent_groups]))
@@ -72,27 +70,49 @@ def fitness_function(s, agents):
     
     return learner_win_rate
 
-def mutator(data):
-    with open("new_data.json", 'w') as f:
-        json.dump(data, f, indent=2)
-
+    
 if __name__ == "__main__":
     from random_agent import Random
     from baseline import Baseline
     from learning_bayes import LearningBayes
     from bayes3 import Bayes3
 
-    s = 2000
-    agents = [LearningBayes, Baseline]
+    with open('base_data.json') as f:
+        data = json.load(f)
+
+    s = 900
+    increment = 0.001
+    agents = [LearningBayes, Bayes3]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    current_win_rate = 0
-    for i in range(1):
-        new_win_rate = fitness_function(s, agents)
-        if current_win_rate < new_win_rate:
-            #learn some stuff
-            pass
+    old_win_rate = 0
+    
+    attributes = sample(list(data.keys()), 3)
+    abc = [randrange(3) for i in range(3)]
+    amount = [choice([-increment, increment]) for i in range(3)]
 
+    for i in range(10):
+        new_win_rate = fitness_function(s, agents, data)
+        
+        if new_win_rate > old_win_rate:
+            print("IMPROVED")
+            with open("old_data.json", 'w') as f: json.dump(data, f, indent=1)
+            for i in range(3): data[attributes[i]][abc[i]] += amount[i]
+            with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
+
+            old_win_rate = new_win_rate
+        
+        else:
+            print("WORSENED")
+            with open('old_data.json') as f: data = json.load(f)
+            with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
+
+            attributes = sample(list(data.keys()), 3)
+            abc = [randrange(3) for i in range(3)]
+            amount = [choice([-increment, increment]) for i in range(3)]
+
+            for i in range(3): data[attributes[i]][abc[i]] += amount[i]
+        
 

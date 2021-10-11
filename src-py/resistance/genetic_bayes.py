@@ -34,8 +34,8 @@ class GeneticBayes(Bayes3):
         self.data = json.load(data)
 
         # outcome weight is 1.0
-        self.voting_weight   = 0.6
-        self.proposer_weight = 0.3
+        self.voting_weight   = self.data["vote_weight"]
+        self.proposer_weight = self.data["proposer_weight"]
 
         # hard coding behaviour per round
 
@@ -44,7 +44,7 @@ class GeneticBayes(Bayes3):
                                                                       # spy vote knowing enough spies on mission
         
         self.betray_rate       = self.data["betray_rate"] # chance of betraying
-        self.risky_betray_rate = [self.data["risky_betray_rate"] # chance of betraying with more spies on mission
+        self.risky_betray_rate = [self.data["risky_betray_rate"]] # chance of betraying with more spies on mission
 
         # hardcoded opponent modelling per round
 
@@ -62,6 +62,8 @@ class GeneticBayes(Bayes3):
         self.res_vote_failed     = self.data["res_vote_failed"]
         self.res_vote_success    = self.data["res_vote_success"]
 
+    def rate(self, vec):
+        return min(0.01, max(0.99, vec[0] * self.fails * self.fails + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 

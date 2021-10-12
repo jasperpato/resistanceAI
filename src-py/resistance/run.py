@@ -9,7 +9,7 @@ if __name__ == "__main__":
     import json
 
     s = 2500
-    agents = [Bayes3]
+    agents = [LearningBayes]
 
     with open('data.json') as f: data = json.load(f)
     run(s, agents, data)

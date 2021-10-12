@@ -1,11 +1,11 @@
 {
     "win_rate": 0.4,
 
-    "vote_threshold":          [-0.025, -0.025,  1.050 ],
-    "failable_vote_threshold": [ 0.050,  0.050,  1.100 ],
+    "vote_threshold":          [-0.03, -0.03,  1.05 ],
+    "failable_vote_threshold": [ 0.05,  0.05,  1.10 ],
     
-    "betray_rate":             [ 0.100,  0.100,  0.200 ],
-    "risky_betray_rate":       [ 0.075,  0.075,  0.150 ],
+    "betray_rate":             [ 0.10,  0.10,  0.20 ],
+    "risky_betray_rate":       [ 0.08,  0.08,  0.15 ],
     
-    "opponent_betray_rate":    [ 0.100,  0.100,  0.200 ]
+    "opponent_betray_rate":    [ 0.10,  0.10,  0.20 ]
 }

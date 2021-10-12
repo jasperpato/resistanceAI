@@ -75,9 +75,10 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
 
     trials    = 100
-    games     = 1000
+    games     = 2000
     changes   = 3
-    increment = 0.025
+    increment = 0.01
+    dp        = 2     # decimal places of data
     agents = [LearningBayes, Bayes3]
 
     with open('data.json') as f: data = json.load(f)
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     amount = [choice([-increment, increment]) for i in range(changes)]
     for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
     for k in keys:
-        for i in range(3): data[k][i] = round(data[k][i], 4)
+        for i in range(3): data[k][i] = round(data[k][i], dp)
 
     for i in range(trials):
         new_win_rate = run(games, agents, data)
@@ -104,7 +105,7 @@ if __name__ == "__main__":
             # increment same values again
             for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
             for k in keys:
-                for i in range(3): data[k][i] = round(data[k][i], 4)       
+                for i in range(3): data[k][i] = round(data[k][i], dp)       
         else:
             print("Did not improve.")
 
@@ -117,6 +118,6 @@ if __name__ == "__main__":
             amount = [choice([-increment, increment]) for i in range(changes)]
             for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
             for k in keys:
-                for i in range(3): data[k][i] = round(data[k][i], 4)
+                for i in range(3): data[k][i] = round(data[k][i], dp)
 
 

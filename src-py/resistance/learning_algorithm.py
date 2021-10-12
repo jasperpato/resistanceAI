@@ -80,33 +80,35 @@ if __name__ == "__main__":
     with open('new_data.json') as f:
         data = json.load(f)
 
-    trials = 10
-    games = 5000
+    trials = 100
+    games = 6000
     changes = 3
-    increment = 0.005
+    increment = 0.03
     agents = [LearningBayes, Bayes3]
     
     if len(sys.argv) > 1:
         s = int(sys.argv[1])
 
-    old_win_rate = data["old_win_rate"]
+    old_win_rate = data["win_rate"]
     
     keys = list(data.keys())
     keys.remove("win_rate")
     attributes = sample(keys, changes)
 
     abc = [randrange(changes) for i in range(changes)]
-    amount = [choice([-increment, increment]) for i in range(3)]
+    amount = [choice([-increment, increment]) for i in range(changes)]
+
+    for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
 
     for i in range(trials):
 
-        new_win_rate = fitness_function(s, agents, data)
+        new_win_rate = fitness_function(games, agents, data)
         
         if new_win_rate > old_win_rate:
             print("IMPROVED")
+            data["win_rate"] = new_win_rate
             with open("old_data.json", 'w') as f: json.dump(data, f, indent=1)
             for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
-            data["win_rate"] = new_win_rate
             with open("new_data.json", 'w') as f: json.dump(data, f, indent=1)
 
             old_win_rate = new_win_rate        

@@ -8,10 +8,12 @@ if __name__ == "__main__":
     from learning_bayes import LearningBayes
     import json
 
-    s = 2500
-    agents = [LearningBayes]
+    num_games = 2500
+    agents    = [Bayes3, LearningBayes]
 
-    with open('data.json') as f: data = json.load(f)
-    run(s, agents, data)
+    data = None
+    with open('test_data.json') as f: data = json.load(f)
+
+    run(num_games, agents, data)
 
 

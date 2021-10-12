@@ -51,7 +51,7 @@ class LearningBayes(Bayes3):
         # opponent modelling per round
 
         self.opponent_betray_rate = data["opponent_betray_rate"]
-        
+
         self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
         self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
 
@@ -65,7 +65,9 @@ class LearningBayes(Bayes3):
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def rate(self, vec):
-        return min(0.01, max(0.99, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
+        r = min(0.01, max(0.99, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
+        print(f"rnd: {self.rnd-1}, fails: {self.fails}, rate: {round(r,4)}")
+        return r
 
     def is_spy(self): return self.spies != []
 

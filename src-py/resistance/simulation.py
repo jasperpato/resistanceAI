@@ -75,10 +75,10 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
 
     trials    = 100
-    games     = 2000
+    games     = 1000
     changes   = 3
-    increment = 0.01
-    dp        = 2     # decimal places of data
+    increment = 0.005
+    dp        = 3     # decimal places of data
     agents = [LearningBayes, Bayes3]
 
     with open('data.json') as f: data = json.load(f)

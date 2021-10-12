@@ -12,7 +12,7 @@ if __name__ == "__main__":
     agents    = [Bayes3, LearningBayes]
 
     data = None
-    with open('test_data.json') as f: data = json.load(f)
+    with open('data.json') as f: data = json.load(f)
 
     run(num_games, agents, data)
 

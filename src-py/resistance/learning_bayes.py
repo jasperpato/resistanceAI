@@ -65,9 +65,7 @@ class LearningBayes(Bayes3):
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def rate(self, vec):
-        r = min(0.01, max(0.99, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
-        print(f"rnd: {self.rnd-1}, fails: {self.fails}, rate: {round(r,4)}")
-        return r
+        return min(0.99, max(0.01, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 

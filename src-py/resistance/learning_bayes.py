@@ -34,7 +34,6 @@ class LearningBayes(Bayes3):
 
     def __init__(self, data, name='LearningBayes'):
         self.name = name
-        self.class_name = "LearningBayes"
 
         # outcome weight is 1.0
         self.vote_weight   = 0.4
@@ -66,7 +65,7 @@ class LearningBayes(Bayes3):
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def rate(self, vec):
-        return min(0.001, max(0.999, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
+        return min(0.01, max(0.99, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 
@@ -95,10 +94,6 @@ class LearningBayes(Bayes3):
         worlds = list(combinations(range(self.num_players), self.num_spies))
         self.worlds = {w: 1/len(worlds) for w in worlds}
         self.update_suspicions()
-    
-    def get_rate(self, vec):
-        x = self.successes - self.fails
-        return max(0.05, min(0.95, vec[0] * x ** 2 + vec[1] * x + vec[2]))
 
     def possible_teams(self, l):
         '''
@@ -175,12 +170,12 @@ class LearningBayes(Bayes3):
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission) and not self.bad_mission(mission):
                 return self.mission_suspicion(mission) <= \
-                    self.get_rate(self.failable_vote_threshold) * self.average_suspicion()
+                    self.rate(self.failable_vote_threshold) * self.average_suspicion()
         if self.bad_mission(mission): return False
         if self.player_number not in mission and \
             len(mission) >= self.num_players - self.num_spies: return False
         return self.mission_suspicion(mission) <= \
-            self.get_rate(self.vote_threshold) * self.average_suspicion()
+            self.rate(self.vote_threshold) * self.average_suspicion()
 
     def vote_outcome(self, mission, proposer, votes):
         '''
@@ -195,9 +190,9 @@ class LearningBayes(Bayes3):
             if self.fails == 2 and self.enough_spies(mission): return True
             if self.successes == 2: return True
             elif self.num_spies_in(mission) > self.betrayals_required():
-                return random() < self.get_rate(self.risky_betray_rate)
+                return random() < self.rate(self.risky_betray_rate)
             elif self.num_spies_in(mission) < self.betrayals_required(): return False
-            else: return random() < self.get_rate(self.betray_rate)
+            else: return random() < self.rate(self.betray_rate)
         return False # is resistance
 
     def update_suspicions(self):
@@ -264,7 +259,7 @@ class LearningBayes(Bayes3):
 
         if len(self.worlds) > 1 and self.rnd < 4:
 
-            br = self.get_rate(self.opponent_betray_rate)
+            br = self.rate(self.opponent_betray_rate)
 
             vsf = self.spy_vote_failed[self.rnd]
             vss = self.spy_vote_success[self.rnd]

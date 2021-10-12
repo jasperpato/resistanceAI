@@ -30,7 +30,6 @@ class Bayes3(Agent):
 
     def __init__(self, name='Bayes3'):
         self.name = name
-        self.class_name = "Bayes3"
 
         # outcome weight is 1.0
         self.voting_weight   = 0.4

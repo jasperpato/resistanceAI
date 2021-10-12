@@ -5,9 +5,7 @@ class Human(Agent):
     A human agent.
     Actions must be input on the command line.
     '''
-    def __init__(self, name="Human"):
-        self.name = name
-        self.class_name = "Human"
+    def __init__(self, name="Human"): self.name = name
 
     def new_game(self, number_of_players, player_number, spies):
         self.number_of_players = number_of_players

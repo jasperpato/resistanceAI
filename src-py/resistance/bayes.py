@@ -27,9 +27,7 @@ class Bayes(Agent):
     Worlds probabilities are based on only mission outcomes.
     '''    
 
-    def __init__(self, name='Bayes'):
-        self.name = name
-        self.class_name = "Bayes"
+    def __init__(self, name='Bayes'): self.name = name
 
     def is_spy(self): return self.spies != []
 

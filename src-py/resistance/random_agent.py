@@ -4,13 +4,7 @@ import random
 class Random(Agent):        
     '''A sample implementation of a random agent in the game The Resistance'''
 
-    def __init__(self, name='Random'):
-        '''
-        Initialises the agent.
-        Nothing to do here.
-        '''
-        self.name = name
-        self.class_name = "Random"
+    def __init__(self, name='Random'): self.name = name
 
     def new_game(self, number_of_players, player_number, spy_list):
         '''

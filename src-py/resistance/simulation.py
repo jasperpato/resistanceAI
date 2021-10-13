@@ -40,11 +40,11 @@ if __name__ == "__main__":
         win_rates.pop("LearningBayes")
         others_rate = sum([r for r in win_rates.values()]) / len(win_rates)
 
-        if win_rates["LearningBayes"] > data["win_rate"]: 
+        if l_rate - others_rate > data["win_rate_difference"]: 
             print("Improved.")
  
             # update data
-            data["win_rate"] = round(win_rates["LearningBayes"], 4)
+            data["win_rate_difference"] = round(l_rate - others_rate, 4)
             with open("data.json", 'w') as f: json.dump(data, f, indent=2)
             
             # increment same values again

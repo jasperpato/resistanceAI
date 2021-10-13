@@ -65,10 +65,10 @@ class LearningBayes(Bayes3):
         self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
 
     def calc_threshold(self, vec):
-        return vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]
+        return vec[0] * self.rnd + vec[1] * self.fails + vec[2]
 
     def calc_rate(self, vec):
-        return min(0.99, max(0.01, vec[0] * (self.rnd-1) + vec[1] * self.fails + vec[2]))
+        return min(0.99, max(0.01, vec[0] * self.rnd + vec[1] * self.fails + vec[2]))
 
     def is_spy(self): return self.spies != []
 
@@ -195,7 +195,8 @@ class LearningBayes(Bayes3):
             elif self.num_spies_in(mission) > self.betrayals_required():
                 return random() < self.calc_rate(self.risky_betray_rate)
             elif self.num_spies_in(mission) < self.betrayals_required(): return False
-            else: return random() < self.calc_rate(self.betray_rate)
+            else:
+                return random() < self.calc_rate(self.betray_rate)
         return False # is resistance
 
     def update_suspicions(self):

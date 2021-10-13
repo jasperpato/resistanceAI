@@ -72,8 +72,8 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
     import json
 
-    num_games = 500
-    agents    = [LearningBayes, Bayes3]
+    num_games = 1000
+    agents    = [LearningBayes, Bayes3, Bayes2, Bayes, Baseline, Random]
 
     data = None
     with open('data.json') as f: data = json.load(f)

@@ -77,8 +77,9 @@ if __name__ == "__main__":
     trials    = 100
     games     = 1000
     changes   = 3
-    increment = 0.005
+    increment = 0.02
     dp        = 3     # decimal places of data
+    chances_to_improve = 5
     agents = [LearningBayes, Bayes3]
 
     with open('data.json') as f: data = json.load(f)
@@ -93,10 +94,14 @@ if __name__ == "__main__":
     for k in keys:
         for i in range(3): data[k][i] = round(data[k][i], dp)
 
+    did_not_improve_count = 0
+
     for i in range(trials):
+        print(f'\nTrial {i+1}\n')
         new_win_rate = run(games, agents, data)
         if new_win_rate > data["win_rate"]: 
             print("Improved.")
+            did_not_improve_count = 0
             
             # update data
             data["win_rate"] = round(new_win_rate, 4)
@@ -108,14 +113,21 @@ if __name__ == "__main__":
                 for i in range(3): data[k][i] = round(data[k][i], dp)       
         else:
             print("Did not improve.")
+            did_not_improve_count += 1
 
-            # revert changes
-            for i in range(changes): data[attributes[i]][abc[i]] -= amount[i]
+            if did_not_improve_count == chances_to_improve:
+                print("Reverting changes")
+                # revert changes
+                with open('data.json') as f: data = json.load(f)
+                #for i in range(changes): data[attributes[i]][abc[i]] -= amount[i]
 
+                did_not_improve_count = 0
+            
             # increment new random numbers
             attributes = sample(keys, changes)
             abc = [randrange(changes) for i in range(changes)]
             amount = [choice([-increment, increment]) for i in range(changes)]
+
             for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
             for k in keys:
                 for i in range(3): data[k][i] = round(data[k][i], dp)

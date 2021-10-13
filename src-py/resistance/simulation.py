@@ -1,67 +1,68 @@
+from random import Random
+
+
 if __name__ == "__main__":
-    from learning_bayes import LearningBayes
+    from random_agent import Random
+    from baseline import Baseline
+    from bayes import Bayes
+    from bayes2 import Bayes2
     from bayes3 import Bayes3
     from learning_bayes import LearningBayes
     from random import randrange, choice, sample
     import json
     from run import run
 
-    trials    = 100
-    games     = 1000
-    changes   = 3
-    increment = 0.02
-    dp        = 2     # decimal places of data
-    chances_to_improve = 5
-    agents = [LearningBayes, Bayes3]
+    n_trials    = 100
+    n_games     = 500
+    n_changes   = 5
+    increment   = 0.02
+    n_dp        = 2
+    agents = [LearningBayes, Bayes3, Bayes2, Bayes, Baseline, Random]
 
     with open('data.json') as f: data = json.load(f)
     old_win_rate = data["win_rate"]
     keys = list(data.keys())
     keys.remove("win_rate")
-    attributes = sample(keys, changes)
+    
+    attributes = sample(keys, n_changes)
+    abc = [randrange(3) for i in range(n_changes)]
+    amount = [choice([-increment, increment]) for i in range(n_changes)]
 
-    abc = [randrange(changes) for i in range(3)]
-    amount = [choice([-increment, increment]) for i in range(changes)]
-    for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
-    for k in keys:
-        for i in range(3): data[k][i] = round(data[k][i], dp)
+    for i in range(n_changes):
+        d = data[attributes[i]][abc[i]]
+        data[attributes[i]][abc[i]] = round(d + amount[i], n_dp)
 
-    did_not_improve_count = 0
-
-    for i in range(trials):
+    for i in range(n_trials):
         print(f'\nTrial {i+1}\n')
-        new_win_rate = run(games, agents, data)
-        if new_win_rate > data["win_rate"]: 
+        
+        win_rates = run(n_games, agents, data)
+        l_rate = win_rates["LearningBayes"]
+        win_rates.pop("LearningBayes")
+        others_rate = sum([r for r in win_rates.values()]) / len(win_rates)
+
+        if win_rates["LearningBayes"] > data["win_rate"]: 
             print("Improved.")
-            did_not_improve_count = 0
-            
+ 
             # update data
-            data["win_rate"] = round(new_win_rate, 4)
+            data["win_rate"] = round(win_rates["LearningBayes"], 4)
             with open("data.json", 'w') as f: json.dump(data, f, indent=2)
             
             # increment same values again
-            for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
-            for k in keys:
-                for i in range(3): data[k][i] = round(data[k][i], dp)       
+            for i in range(n_changes):
+                d = data[attributes[i]][abc[i]]
+                data[attributes[i]][abc[i]] = round(d + amount[i], n_dp)       
         else:
             print("Did not improve.")
-            did_not_improve_count += 1
 
-            if did_not_improve_count == chances_to_improve:
-                print("Reverting changes")
-                # revert changes
-                with open('data.json') as f: data = json.load(f)
-                #for i in range(changes): data[attributes[i]][abc[i]] -= amount[i]
-
-                did_not_improve_count = 0
+            with open('data.json') as f: data = json.load(f)
             
-            # increment new random numbers
-            attributes = sample(keys, changes)
-            abc = [randrange(changes) for i in range(changes)]
-            amount = [choice([-increment, increment]) for i in range(changes)]
-
-            for i in range(changes): data[attributes[i]][abc[i]] += amount[i]
-            for k in keys:
-                for i in range(3): data[k][i] = round(data[k][i], dp)
+            # increment new random attributes
+            attributes = sample(keys, n_changes)
+            abc = [randrange(3) for i in range(n_changes)]
+            amount = [choice([-increment, increment]) for i in range(n_changes)]
+            
+            for i in range(n_changes):
+                d = data[attributes[i]][abc[i]]
+                data[attributes[i]][abc[i]] = round(d + amount[i], n_dp)  
 
 

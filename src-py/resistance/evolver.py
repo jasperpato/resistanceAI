@@ -1,9 +1,7 @@
 from agent import Agent
 from random import random
-from bayes3 import Bayes3
 from itertools import combinations
 from math import comb
-import json
 
 class Mission:
     '''
@@ -21,7 +19,7 @@ class Mission:
         self.success = None             # None if no mission carried out, but False
                                         # if this is the fifth aborted mission
 
-class LearningBayes(Agent):    
+class Evolver(Agent):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
@@ -32,43 +30,15 @@ class LearningBayes(Agent):
     where x = missions_failed - missions_succeeded
     '''    
 
-    def __init__(self, data, name='LearningBayes'):
+    def __init__(self, data, name='Evolver'):
+        self.data = data
         self.name = name
 
-        # outcome weight is 1.0
-        self.vote_weight   = 0.4
-        self.proposer_weight = 0.3
-
-        # hard coding behaviour per round
-
-        self.vote_threshold          = data["vote_threshold"] # multiplied by average suspicion
-        self.failable_vote_threshold = data["failable_vote_threshold"] # multiplied by average suspicion
-                                                                      # spy vote knowing enough spies on mission
-        
-        self.betray_rate       = data["betray_rate"] # chance of betraying
-        self.risky_betray_rate = data["risky_betray_rate"] # chance of betraying with more spies on mission
-
-        # opponent modelling per round
-
-        self.opponent_betray_rate = data["opponent_betray_rate"]
-
-        self.spy_vote_failed     = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy voting for a failed mission
-        self.spy_vote_success    = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy voting for a successful mission
-
-        self.spy_propose_failed  = [0.50, 0.55, 0.60, 0.80, 0.95] # chance of spy proposing a failed mission
-        self.spy_propose_success = [0.50, 0.45, 0.40, 0.20, 0.05] # chance of spy proposing a successful mission 
-
-        self.res_vote_failed     = [0.50, 0.45, 0.40, 0.20, 0.05]
-        self.res_vote_success    = [0.50, 0.55, 0.60, 0.80, 0.95]
-        
-        self.res_propose_failed  = [0.50, 0.45, 0.45, 0.40, 0.30]
-        self.res_propose_success = [0.50, 0.55, 0.55, 0.60, 0.70]
-
     def calc_threshold(self, vec):
-        return vec[0] * self.rnd + vec[1] * self.fails + vec[2]
+        return vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]
 
     def calc_rate(self, vec):
-        return min(0.99, max(0.01, vec[0] * self.rnd + vec[1] * self.fails + vec[2]))
+        return min(0.99, max(0.01, vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]))
 
     def is_spy(self): return self.spies != []
 
@@ -87,12 +57,12 @@ class LearningBayes(Agent):
         self.fails     = 0
         self.downvotes = 0
 
-        self.num_players = num_players
+        self.num_players   = num_players
         self.player_number = player_number
-        self.num_spies = self.spy_count[self.num_players]
-        self.spies = spies
-        self.missions = []
-        self.failed_teams = [] # teams that betrayed - avoid them
+        self.num_spies     = self.spy_count[self.num_players]
+        self.spies         = spies
+        self.missions      = []
+        self.failed_teams  = [] # teams that betrayed - avoid them
 
         worlds = list(combinations(range(self.num_players), self.num_spies))
         self.worlds = {w: 1/len(worlds) for w in worlds}
@@ -173,12 +143,12 @@ class LearningBayes(Agent):
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission) and not self.bad_mission(mission):
                 return self.mission_suspicion(mission) <= \
-                    self.calc_threshold(self.failable_vote_threshold) * self.average_suspicion()
+                    self.calc_threshold(self.data['failable_vote_threshold']) * self.average_suspicion()
         if self.bad_mission(mission): return False
         if self.player_number not in mission and \
             len(mission) >= self.num_players - self.num_spies: return False
         return self.mission_suspicion(mission) <= \
-            self.calc_threshold(self.vote_threshold) * self.average_suspicion()
+            self.calc_threshold(self.data['vote_threshold']) * self.average_suspicion()
 
     def vote_outcome(self, mission, proposer, votes):
         '''
@@ -193,10 +163,10 @@ class LearningBayes(Agent):
             if self.fails == 2 and self.enough_spies(mission): return True
             if self.successes == 2: return True
             elif self.num_spies_in(mission) > self.betrayals_required():
-                return random() < self.calc_rate(self.risky_betray_rate)
+                return random() < self.calc_rate(self.data['risky_betray_rate'])
             elif self.num_spies_in(mission) < self.betrayals_required(): return False
             else:
-                return random() < self.calc_rate(self.betray_rate)
+                return random() < self.calc_rate(self.data['betray_rate'])
         return False # is resistance
 
     def update_suspicions(self):
@@ -211,7 +181,7 @@ class LearningBayes(Agent):
                     if x in w: self.suspicions[x] += wp
 
     def print_suspicions(self):
-        print(f"\nPlayer {self.player_number}:")
+        print(f'\nPlayer {self.player_number}:')
         print({s[0]: round(s[1],5) for s in self.suspicions.items()})
 
     def outcome_probability(self, spies_in_mission, betrayals, betray_rate):
@@ -263,17 +233,15 @@ class LearningBayes(Agent):
 
         if len(self.worlds) > 1 and self.rnd < 4:
 
-            br = self.calc_rate(self.opponent_betray_rate)
-
-            vsf = self.spy_vote_failed[self.rnd]
-            vss = self.spy_vote_success[self.rnd]
-            vrf = self.res_vote_failed[self.rnd]
-            vrs = self.res_vote_success[self.rnd]
-
-            psf = self.spy_propose_failed[self.rnd]
-            pss = self.spy_propose_success[self.rnd]
-            prf = self.res_propose_failed[self.rnd]
-            prs = self.res_propose_success[self.rnd]
+            br = self.calc_rate(self.data['opponent_betray_rate'])
+            vsf = self.data['spy_vote_failed']
+            vss = self.data['spy_vote_success']
+            vrf = self.data['res_vote_failed']
+            vrs = self.data['res_vote_success']
+            psf = self.data['spy_propose_failed']
+            pss = self.data['spy_propose_success']
+            prf = self.data['res_propose_failed']
+            prs = self.data['res_propose_success']
 
             outcome_prob = 0  # overall probability of this mission outcome
             for w, wp in self.worlds.items():
@@ -298,7 +266,7 @@ class LearningBayes(Agent):
             for w in self.worlds.keys():
                 new_p = self.vote_probability(w, self.missions[-1].votes_for, vsf, vss, vrf, vrs, mission_success) \
                     * self.worlds[w] / voting_prob
-                self.worlds[w] = self.vote_weight * new_p + (1-self.vote_weight) * self.worlds[w]
+                self.worlds[w] = self.data['vote_weight'] * new_p + (1-self.data['vote_weight']) * self.worlds[w]
 
             proposer_prob = 0  # overall probability of a proposer given mission outcome    
             for w, wp in self.worlds.items():    
@@ -307,7 +275,7 @@ class LearningBayes(Agent):
             for w in self.worlds.keys(): 
                 new_p = self.proposer_probability(w, proposer, psf, pss, prf, prs, mission_success) \
                     * self.worlds[w] / proposer_prob
-                self.worlds[w] = self.proposer_weight * new_p + (1-self.proposer_weight) * self.worlds[w]
+                self.worlds[w] = self.data['proposer_weight'] * new_p + (1-self.data['proposer_weight']) * self.worlds[w]
 
             self.update_suspicions()
 

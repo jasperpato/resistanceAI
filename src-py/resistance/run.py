@@ -72,10 +72,13 @@ if __name__ == "__main__":
     with open('data.json') as f: data = json.load(f)
 
     genes=None
-    with open('genes.json') as f: genes = json.load(f)['0']
+    with open('genes.json') as f: genes = json.load(f)['Ev0']
 
-    num_games = 1000
-    agents    = [Evolver(genes), Bayes3(), Random()]
+    base_genes = None
+    with open('base_genes.json') as f: base_genes = json.load(f)['Ev0']
+
+    num_games = 5000
+    agents    = [Evolver(genes), Evolver(base_genes, 'BaseEvolver')]
 
     run(num_games, agents)
 

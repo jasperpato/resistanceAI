@@ -8,7 +8,7 @@ def child(d1, d2):
     for k in d1.keys():
         d[k] = []
         for n in range(4):
-            d[k].append((d1[k][n] + d2[k][n]) / 2)
+            d[k].append(round((d1[k][n] + d2[k][n]) / 2, 2))
     return d
 
 def mutate(d_in):
@@ -17,13 +17,13 @@ def mutate(d_in):
         if random() < 0.5:
             for n in range(4):
                 if random() < 0.5:
-                    d[k][n] += randrange(-5, 6) / 100
+                    d[k][n] = round(d[k][n] + randrange(-5, 6) / 100, 2)
     return d
 
 if __name__ == '__main__':
 
     num_trials = 100
-    num_games  = 500
+    num_games  = 5000
 
     for t in range(num_trials):
         
@@ -32,22 +32,21 @@ if __name__ == '__main__':
         
         agents = [Evolver(data, name) for name, data in genes.items()]
 
+        print(f"Trial {t}")
         win_rates = run(num_games, agents)
         rankings = sorted(win_rates, key=win_rates.get)
 
         new_genes = genes
         for i, k in enumerate(new_genes.keys()):
-            if i < 3: # top 3 survive
+            if i < 2: # top 2 survive
                 new_genes[k] = genes[rankings[i]]
-            elif i == 3: # next three are children combinations of top 3
+            elif i == 2: # next two are children of top 1 with next two
                 new_genes[k] = child(genes[rankings[0]], genes[rankings[1]])
-            elif i == 4:
+            elif i == 3:
                 new_genes[k] = child(genes[rankings[0]], genes[rankings[2]])
-            elif i == 5:
-                new_genes[k] = child(genes[rankings[1]], genes[rankings[2]])
-            elif i < 8: # next two are mutations of rank 1
+            elif i < 6: # next two are mutations of rank 1
                 new_genes[k] = mutate(genes[rankings[0]])
-            else: # last two are mutations of rank 2
+            else:
                 new_genes[k] = mutate(genes[rankings[1]])
 
         with open('genes.json', 'w') as f: json.dump(new_genes, f, indent=4)

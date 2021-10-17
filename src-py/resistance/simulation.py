@@ -17,12 +17,12 @@ if __name__ == "__main__":
     n_changes   = 5
     increment   = 0.02
     n_dp        = 2
-    agents = [LearningBayes, Bayes3, Bayes2, Bayes, Baseline, Random]
 
+    data = None
     with open('data.json') as f: data = json.load(f)
-    old_win_rate = data["win_rate"]
+    old_win_rate = data["win_rate_difference"]
     keys = list(data.keys())
-    keys.remove("win_rate")
+    keys.remove("win_rate_difference")
     
     attributes = sample(keys, n_changes)
     abc = [randrange(3) for i in range(n_changes)]
@@ -35,7 +35,9 @@ if __name__ == "__main__":
     for i in range(n_trials):
         print(f'\nTrial {i+1}\n')
         
-        win_rates = run(n_games, agents, data)
+        agents = [LearningBayes(data), Bayes3(), Baseline(), Random()]
+        win_rates = run(n_games, agents)
+
         l_rate = win_rates["LearningBayes"]
         win_rates.pop("LearningBayes")
         others_rate = sum([r for r in win_rates.values()]) / len(win_rates)

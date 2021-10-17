@@ -234,14 +234,14 @@ class Evolver(Agent):
         if len(self.worlds) > 1 and self.rnd < 4:
 
             br = self.calc_rate(self.data['opponent_betray_rate'])
-            vsf = self.data['spy_vote_failed']
-            vss = self.data['spy_vote_success']
-            vrf = self.data['res_vote_failed']
-            vrs = self.data['res_vote_success']
-            psf = self.data['spy_propose_failed']
-            pss = self.data['spy_propose_success']
-            prf = self.data['res_propose_failed']
-            prs = self.data['res_propose_success']
+            vsf = self.calc_rate(self.data['spy_vote_failed'])
+            vss = self.calc_rate(self.data['spy_vote_success'])
+            vrf = self.calc_rate(self.data['res_vote_failed'])
+            vrs = self.calc_rate(self.data['res_vote_success'])
+            psf = self.calc_rate(self.data['spy_propose_failed'])
+            pss = self.calc_rate(self.data['spy_propose_success'])
+            prf = self.calc_rate(self.data['res_propose_failed'])
+            prs = self.calc_rate(self.data['res_propose_success'])
 
             outcome_prob = 0  # overall probability of this mission outcome
             for w, wp in self.worlds.items():
@@ -266,7 +266,8 @@ class Evolver(Agent):
             for w in self.worlds.keys():
                 new_p = self.vote_probability(w, self.missions[-1].votes_for, vsf, vss, vrf, vrs, mission_success) \
                     * self.worlds[w] / voting_prob
-                self.worlds[w] = self.data['vote_weight'] * new_p + (1-self.data['vote_weight']) * self.worlds[w]
+                vw = self.calc_rate(self.data['vote_weight'])
+                self.worlds[w] = vw * new_p + (1-vw) * self.worlds[w]
 
             proposer_prob = 0  # overall probability of a proposer given mission outcome    
             for w, wp in self.worlds.items():    
@@ -275,7 +276,8 @@ class Evolver(Agent):
             for w in self.worlds.keys(): 
                 new_p = self.proposer_probability(w, proposer, psf, pss, prf, prs, mission_success) \
                     * self.worlds[w] / proposer_prob
-                self.worlds[w] = self.data['proposer_weight'] * new_p + (1-self.data['proposer_weight']) * self.worlds[w]
+                pw = self.calc_rate(self.data['proposer_weight'])
+                self.worlds[w] = pw * new_p + (1-pw) * self.worlds[w]
 
             self.update_suspicions()
 

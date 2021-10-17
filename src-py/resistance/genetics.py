@@ -38,18 +38,18 @@ if __name__ == '__main__':
 
         new_genes = genes
         for i, k in enumerate(new_genes.keys()):
-            if i < 2: # top 2 survive
+            if i < 3: # top 3 survive
                 new_genes[k] = genes[rankings[i]]
-            elif i == 2: # next two are children of top 1 with next two
+            elif i == 3: # next two are children of top 1 with next two
                 new_genes[k] = child(genes[rankings[0]], genes[rankings[1]])
-            elif i == 3:
+            elif i == 4:
                 new_genes[k] = child(genes[rankings[0]], genes[rankings[2]])
-            elif i < 6: # next two are mutations of rank 1
+            elif i < 6: # next two are mutations of top 1
                 new_genes[k] = mutate(genes[rankings[0]])
-            else:
+            else: # last one is mutation of rank 2
                 new_genes[k] = mutate(genes[rankings[1]])
 
-        with open('genes.json', 'w') as f: json.dump(new_genes, f, indent=4)
+        with open('genes.json', 'w') as f: json.dump(new_genes, f)
 
         
 

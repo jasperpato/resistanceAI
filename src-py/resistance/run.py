@@ -71,7 +71,7 @@ if __name__ == "__main__":
     data = None
     with open('data.json') as f: data = json.load(f)
 
-    genes=None
+    genes = None
     with open('genes.json') as f: genes = json.load(f)['Ev0']
 
     base_genes = None

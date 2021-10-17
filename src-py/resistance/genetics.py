@@ -1,5 +1,9 @@
-from run import run
 from evolver import Evolver
+from bayes3 import Bayes3
+from baseline import Baseline
+from random_agent import Random
+
+from run import run
 import json
 from random import random, randrange
 
@@ -22,7 +26,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 5000
+    num_games  = 50
     
     t = 0
     while True:
@@ -31,11 +35,19 @@ if __name__ == '__main__':
         with open('genes.json') as f: genes = json.load(f)
         
         agents = [Evolver(data, name) for name, data in genes.items()]
+        agents += [Bayes3(), Baseline(), Random()]
 
         print(f"Trial {t}")
         t+=1
-        win_rates = run(num_games, agents)
-        rankings = sorted(win_rates, key=win_rates.get)
+        win_rates = run(num_games, agents, False)
+        win_rates.pop('Bayes3')
+        win_rates.pop('Baseline')
+        win_rates.pop('Random')
+
+        rankings = sorted(win_rates, key=win_rates.get, reverse=True)
+
+        print(win_rates)
+        print(rankings)
 
         new_genes = genes
         for i, k in enumerate(new_genes.keys()):

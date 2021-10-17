@@ -27,17 +27,18 @@ class AgentStats():
         if self.spy_plays + self.res_plays <= 0: return 0
         else: return round((self.spy_wins + self.res_wins) / (self.spy_plays + self.res_plays), 5)
 
-def run(num_games, agents):
+def run(num_games, agents, verbose=True):
     '''
     Simulates s random games between the agents specified in agents and prints results
     '''
     t = time.time()
 
     agent_stats = [AgentStats(a.name) for a in agents]
-    print('\n'+str([a.name for a in agent_stats]))
+    if verbose: print('\n'+str([a.name for a in agent_stats]))
     for i in range(num_games):
-        sys.stdout.write(f"\rSimulating game {i+1} / {num_games}")
-        sys.stdout.flush()
+        if verbose:
+            sys.stdout.write(f"\rSimulating game {i+1} / {num_games}")
+            sys.stdout.flush()
         n = randrange(5,11)
         game = Game([deepcopy(choice(agents)) for p in range(n)])
         game.play()
@@ -53,9 +54,10 @@ def run(num_games, agents):
                 for a in agent_stats:
                     if game.agents[j].name == a.name: a.res_wins += 1
     
-    print(f'\nTime taken {round(time.time()-t,2)} seconds\n')
-    for a in agent_stats:
-        print(f"{a.name}: spy win rate {a.spy_win_rate()}, res win rate {a.res_win_rate()}, overall win rate {a.win_rate()}\n")
+    if verbose:
+        print(f'\nTime taken {round(time.time()-t,2)} seconds\n')
+        for a in agent_stats:
+            print(f"{a.name}: spy win rate {a.spy_win_rate()}, res win rate {a.res_win_rate()}, overall win rate {a.win_rate()}\n")
 
     return {a.name: a.win_rate() for a in agent_stats}
 

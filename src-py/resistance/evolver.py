@@ -34,6 +34,10 @@ class Evolver(Agent):
         self.data = data
         self.name = name
 
+        # hard code weights for now
+        self.data['vote_weight'] = [0,0,0,0.4]
+        self.data['proposer_weight'] = [0,0,0,0.3]
+
     def calc_threshold(self, vec):
         return vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]
 

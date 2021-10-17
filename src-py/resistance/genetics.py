@@ -22,10 +22,10 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_trials = 100
     num_games  = 5000
-
-    for t in range(num_trials):
+    
+    t = 0
+    while True:
         
         genes = None
         with open('genes.json') as f: genes = json.load(f)
@@ -33,6 +33,7 @@ if __name__ == '__main__':
         agents = [Evolver(data, name) for name, data in genes.items()]
 
         print(f"Trial {t}")
+        t+=1
         win_rates = run(num_games, agents)
         rankings = sorted(win_rates, key=win_rates.get)
 

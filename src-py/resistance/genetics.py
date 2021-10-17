@@ -26,7 +26,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 50
+    num_games  = 5000
     
     t = 0
     while True:
@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
         rankings = sorted(win_rates, key=win_rates.get, reverse=True)
 
-        print(win_rates)
-        print(rankings)
+        #print(win_rates)
+        #print(rankings)
 
         new_genes = genes
         for i, k in enumerate(new_genes.keys()):

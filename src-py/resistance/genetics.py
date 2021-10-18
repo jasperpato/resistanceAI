@@ -27,7 +27,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 5000
+    num_games  = 7500
     
     t = 0
     while True:

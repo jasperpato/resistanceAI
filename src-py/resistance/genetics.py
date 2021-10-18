@@ -27,7 +27,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 10000
+    num_games  = 5000
     
     t = 0
     while True:
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         win_rates.pop('Random')
 
         rankings = sorted(win_rates, key=win_rates.get, reverse=True)
-        print(f"Trial {t}: {rankings}")
+        print(f"Trial {t}: {win_rates}")
         t+=1
 
         new_genes = {}

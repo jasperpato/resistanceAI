@@ -47,21 +47,18 @@ if __name__ == '__main__':
 
         rankings = sorted(win_rates, key=win_rates.get, reverse=True)
 
-        for k in genes.keys(): print(k, genes[k]['vote_threshold'], win_rates[k])
-        print(rankings)
-
-        new_genes = {
-            'Ev0': genes[rankings[0]],
-            'Ev1': genes[rankings[1]],
-            'Ev2': genes[rankings[2]],
-            'Ev3': child(genes[rankings[0]], genes[rankings[1]]),
-            'Ev4': child(genes[rankings[0]], genes[rankings[2]]),
-            'Ev5': mutate(genes[rankings[0]]),
-            'Ev6': mutate(genes[rankings[0]]),
-            'Ev7': mutate(genes[rankings[1]])
-        }
-
-        for k in new_genes.keys(): print(k, new_genes[k]['vote_threshold'])
+        new_genes = {}
+        for i, k in enumerate(genes.keys()):
+            if i < 3:
+                new_genes[k] = genes[rankings[i]],
+            elif i == 3:
+                new_genes[k] = child(genes[rankings[0]], genes[rankings[1]]),
+            elif i == 4:
+                new_genes[k] = child(genes[rankings[0]], genes[rankings[2]]),
+            elif i < 7:
+                new_genes[k] = mutate(genes[rankings[0]]),
+            else:
+                new_genes[k] = mutate(genes[rankings[1]])
 
         with open('genes.json', 'w') as f: json.dump(new_genes, f)
 

@@ -27,7 +27,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 50
+    num_games  = 5000
     
     t = 0
     while True:
@@ -50,13 +50,13 @@ if __name__ == '__main__':
         new_genes = {}
         for i, k in enumerate(genes.keys()):
             if i < 3:
-                new_genes[k] = genes[rankings[i]],
+                new_genes[k] = genes[rankings[i]]
             elif i == 3:
-                new_genes[k] = child(genes[rankings[0]], genes[rankings[1]]),
+                new_genes[k] = child(genes[rankings[0]], genes[rankings[1]])
             elif i == 4:
-                new_genes[k] = child(genes[rankings[0]], genes[rankings[2]]),
+                new_genes[k] = child(genes[rankings[0]], genes[rankings[2]])
             elif i < 7:
-                new_genes[k] = mutate(genes[rankings[0]]),
+                new_genes[k] = mutate(genes[rankings[0]])
             else:
                 new_genes[k] = mutate(genes[rankings[1]])
 

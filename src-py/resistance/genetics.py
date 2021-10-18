@@ -27,7 +27,7 @@ def mutate(d_in):
 
 if __name__ == '__main__':
 
-    num_games  = 5000
+    num_games  = 10000
     
     t = 0
     while True:
@@ -38,29 +38,24 @@ if __name__ == '__main__':
         agents = [Evolver(data, name) for name, data in genes.items()]
         agents += [Bayes3(), Baseline(), Random()]
 
-        print(f"Trial {t}")
-        t+=1
         win_rates = run(num_games, agents, False)
         win_rates.pop('Bayes3')
         win_rates.pop('Baseline')
         win_rates.pop('Random')
 
         rankings = sorted(win_rates, key=win_rates.get, reverse=True)
+        print(f"Trial {t}: {rankings}")
+        t+=1
 
         new_genes = {}
         for i, k in enumerate(genes.keys()):
-            if i < 3:
-                new_genes[k] = genes[rankings[i]]
-            elif i == 3:
-                new_genes[k] = child(genes[rankings[0]], genes[rankings[1]])
-            elif i == 4:
-                new_genes[k] = child(genes[rankings[0]], genes[rankings[2]])
-            elif i < 7:
-                new_genes[k] = mutate(genes[rankings[0]])
-            else:
-                new_genes[k] = mutate(genes[rankings[1]])
+            if i < 3:    new_genes[k] = genes[rankings[i]]
+            elif i == 3: new_genes[k] = child(genes[rankings[0]], genes[rankings[1]])
+            elif i == 4: new_genes[k] = child(genes[rankings[0]], genes[rankings[2]])
+            elif i < 7:  new_genes[k] = mutate(genes[rankings[0]])
+            else:        new_genes[k] = mutate(genes[rankings[1]])
 
-        with open('genes.json', 'w') as f: json.dump(new_genes, f)
+        with open('genes.json', 'w') as f: json.dump(new_genes, f, indent="")
 
         
 

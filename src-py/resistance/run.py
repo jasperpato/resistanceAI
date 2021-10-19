@@ -1,5 +1,4 @@
 from game import Game
-from learning_bayes import LearningBayes
 import sys, time
 from random import randrange, choice
 from copy import deepcopy
@@ -70,17 +69,24 @@ if __name__ == "__main__":
     from evolver import Evolver
     import json
 
-    data = None
-    with open('data.json') as f: data = json.load(f)
+    genes_base = None
+    with open('genes_base.json') as f: genes_base = json.load(f)['Ev0']
 
-    genes = None
-    with open('genes.json') as f: genes = json.load(f)['Ev0']
+    genes_jordan = None
+    with open('genes_jordan.json') as f: genes_jordan = json.load(f)['Ev0']
 
-    base_genes = None
-    with open('base_genes.json') as f: base_genes = json.load(f)['Ev0']
+    genes_250 = None
+    with open('genes_250.json') as f: genes_250 = json.load(f)['Ev0']
 
-    num_games = 5000
-    agents    = [Evolver(genes), Evolver(base_genes, 'BaseEvolver'), Bayes3()]
+    num_games = 10000
+    agents    = [Evolver(genes_jordan, "Jordan"),
+                 Evolver(genes_250, "Jasper"),
+                 Evolver(genes_base, 'BaseEvolver'),
+                 Bayes3(),
+                 Bayes2(),
+                 Bayes(),
+                 Baseline(),
+                 Random()]
 
     run(num_games, agents)
 

@@ -1,6 +1,5 @@
 from agent import Agent
-from random import random, seed
-from time import time
+from random import random, sample
 from itertools import combinations
 from math import comb
 
@@ -142,6 +141,7 @@ class Bayes(Agent):
                 for n in range(1, len(ps)):
                     if not self.enough_spies(team): team = ps[n]
                     else: return team
+        return [self.player_number] + sample([x for x in range(self.num_players) if x != self.player_number], team_size-1)
 
     def mission_suspicion(self, mission):
         '''

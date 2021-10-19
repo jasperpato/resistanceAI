@@ -68,24 +68,23 @@ if __name__ == "__main__":
     from bayes3 import Bayes3
     from evolver import Evolver
     import json
+    import os
+
+    parentdir = os.path.dirname(__file__)
 
     genes_base = None
-    with open('genes_base.json') as f: genes_base = json.load(f)['Ev0']
+    with open(os.path.join(parentdir, 'genes_base.json')) as f: genes_base = json.load(f)['Ev0']
 
     genes_jordan = None
-    with open('genes_jordan.json') as f: genes_jordan = json.load(f)['Ev0']
+    with open(os.path.join(parentdir, 'genes_jordan.json')) as f: genes_jordan = json.load(f)['Ev0']
 
     genes_250 = None
-    with open('genes_250.json') as f: genes_250 = json.load(f)['Ev0']
+    with open(os.path.join(parentdir, 'genes_250.json')) as f: genes_250 = json.load(f)['Ev0']
 
     num_games = 10000
-    agents    = [Evolver(genes_jordan, "Jordan"),
-                 Evolver(genes_250, "Jasper"),
-                 Evolver(genes_base, 'BaseEvolver'),
-                 Bayes3(),
-                 Bayes2(),
-                 Bayes(),
-                 Baseline(),
+    agents    = [Evolver(genes_250, "Jasper"),
+                 Evolver(genes_base, "BaseEvolver"),
+                 Evolver(genes_jordan, "Jordan"),
                  Random()]
 
     run(num_games, agents)

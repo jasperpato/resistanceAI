@@ -238,7 +238,7 @@ class Evolver(Agent):
 
         if len(self.worlds) > 1 and self.rnd < 4:
 
-            br = self.calc_rate(self.data['opponent_betray_rate'])
+            br  = self.calc_rate(self.data['opponent_betray_rate'])
             vsf = self.calc_rate(self.data['spy_vote_failed'])
             vss = self.calc_rate(self.data['spy_vote_success'])
             vrf = self.calc_rate(self.data['res_vote_failed'])

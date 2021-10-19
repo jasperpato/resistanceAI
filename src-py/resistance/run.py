@@ -85,6 +85,8 @@ if __name__ == "__main__":
     agents    = [Evolver(genes_250, "Jasper"),
                  Evolver(genes_base, "BaseEvolver"),
                  Evolver(genes_jordan, "Jordan"),
+                 Baseline(),
+                 Bayes3(),
                  Random()]
 
     run(num_games, agents)

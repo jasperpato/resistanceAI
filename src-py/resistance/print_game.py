@@ -135,6 +135,13 @@ class Mission():
         return self.is_approved() and len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
 
 if __name__ == "__main__":
-   from bayes3 import Bayes3
-   from baseline import Baseline
-   PrintGame([Bayes3() for i in range(4)] + [Human()]).play()
+
+    from human import Human
+    from evolver import Evolver
+    import json
+
+    genes = None
+    with open("genes_jordan.json") as f: genes = json.load(f)['Ev0']
+
+    g = PrintGame([Evolver(genes) for i in range(4)] + [Human()])
+    g.play()

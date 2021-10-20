@@ -69,25 +69,24 @@ if __name__ == "__main__":
     from evolver import Evolver
     import json
     import os
+    p = os.path.dirname(__file__)
 
-    parentdir = os.path.dirname(__file__)
+    genes = None
+    with open(os.path.join(p, 'genes.json')) as f: genes = json.load(f)['Ev0']
 
-    genes_base = None
-    with open(os.path.join(parentdir, 'genes_base.json')) as f: genes_base = json.load(f)['Ev0']
+    jordan = None
+    with open(os.path.join(p, 'genes_jordan.json')) as f: jordan = json.load(f)['Ev0']
 
-    genes_jordan = None
-    with open(os.path.join(parentdir, 'genes_jordan.json')) as f: genes_jordan = json.load(f)['Ev0']
-
-    genes_250 = None
-    with open(os.path.join(parentdir, 'genes_250.json')) as f: genes_250 = json.load(f)['Ev0']
+    genes250 = None
+    with open(os.path.join(p, 'genes_250.json')) as f: genes250 = json.load(f)['Ev0']
 
     num_games = 10000
-    agents    = [Evolver(genes_250, "Jasper"),
-                 Evolver(genes_base, "BaseEvolver"),
-                 Evolver(genes_jordan, "Jordan"),
-                 Baseline(),
-                 Bayes3(),
-                 Random()]
+
+    if len(sys.argv) > 1:
+        try: num_games = int(sys.argv[1])
+        except: num_games = 10000
+
+    agents    = [Evolver(genes), Bayes3(), Baseline(), Random()]
 
     run(num_games, agents)
 

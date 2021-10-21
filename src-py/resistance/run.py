@@ -72,7 +72,7 @@ if __name__ == "__main__":
     p = os.path.dirname(__file__)
 
     genes = None
-    with open(os.path.join(p, 'genes.json')) as f: genes = json.load(f)['Ev0']
+    with open(os.path.join(p, 'genes.json')) as f: genes = json.load(f)['Ev7']
 
     jordan = None
     with open(os.path.join(p, 'genes_jordan.json')) as f: jordan = json.load(f)['Ev0']
@@ -80,13 +80,24 @@ if __name__ == "__main__":
     genes250 = None
     with open(os.path.join(p, 'genes_250.json')) as f: genes250 = json.load(f)['Ev0']
 
+    genes700 = None
+    with open(os.path.join(p, 'genes_700.json')) as f: genes700 = json.load(f)['Ev0']
+
     num_games = 10000
 
     if len(sys.argv) > 1:
         try: num_games = int(sys.argv[1])
         except: num_games = 10000
 
-    agents    = [Evolver(genes), Bayes3(), Baseline(), Random()]
+        if len(sys.argv) > 2:
+            try:
+                genes_in = None
+                with open(sys.argv[2]) as f: genes_in = json.load(f)
+                run(num_games, [Evolver(data, name) for name, data in genes_in.items()])  
+                exit() 
+            except: pass
+
+    agents    = [Evolver(genes, "Evolver900"), Evolver(genes700, "Evolver700"), Evolver(genes250, "Evolver250"), Bayes3(), Baseline(), Random()]
 
     run(num_games, agents)
 

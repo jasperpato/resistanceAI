@@ -67,6 +67,7 @@ if __name__ == "__main__":
     from bayes2 import Bayes2
     from bayes3 import Bayes3
     from evolver import Evolver
+    from evolver_final import Evolved
     import json
     import os
     p = os.path.dirname(__file__)
@@ -97,7 +98,7 @@ if __name__ == "__main__":
                 exit() 
             except: pass
 
-    agents    = [Evolver(genes, "Evolver900")]
+    agents    = [Evolved(), Bayes3()]
 
     run(num_games, agents)
 

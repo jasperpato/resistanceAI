@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 exit() 
             except: pass
 
-    agents    = [Evolver(genes, "Evolver900"), Evolver(genes700, "Evolver700"), Evolver(genes250, "Evolver250"), Bayes3(), Baseline(), Random()]
+    agents    = [Evolver(genes, "Evolver900")]
 
     run(num_games, agents)
 

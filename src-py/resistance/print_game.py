@@ -35,8 +35,6 @@ class PrintGame:
         print(f"Humans: {self.humans}\t" +
         f"AIs: {[i for i in range(self.num_players) if i not in self.humans]}")
         
-        print(f"Spies: {self.spies}")
-        
         for h in self.humans:
             input(f"Press enter to show Player {h} info for 5 seconds:")
             if h in self.spies:
@@ -136,12 +134,17 @@ class Mission():
 
 if __name__ == "__main__":
 
-    from human import Human
-    from evolver import Evolver
+    from evolved import Evolved
+    from bayes3 import Bayes3
+    from baseline import Baseline
+    from random_agent import RandomAgent
     import json
 
     genes = None
-    with open("genes_jordan.json") as f: genes = json.load(f)['Ev0']
+    with open("genes.json") as f: genes = json.load(f)['Ev0']
 
-    g = PrintGame([Evolver(genes) for i in range(4)] + [Human()])
+    l = random.randrange(5,11)
+    agents = [Evolved, Bayes3, Baseline, RandomAgent]
+
+    g = PrintGame([random.choice(agents)() for i in range(l-1)] + [Human()])
     g.play()

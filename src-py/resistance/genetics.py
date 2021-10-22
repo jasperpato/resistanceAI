@@ -1,7 +1,7 @@
 from evolver import Evolver
 from bayes3 import Bayes3
 from baseline import Baseline
-from random_agent import Random
+from random_agent import RandomAgent
 
 from run import run
 from copy import deepcopy
@@ -9,6 +9,9 @@ import json
 from random import random, randrange
 
 def child(d1, d2):
+    '''
+    Returns the average of two dictionaries.
+    '''
     d = {}
     for k in d1.keys():
         d[k] = []
@@ -17,6 +20,9 @@ def child(d1, d2):
     return d
 
 def mutate(d_in):
+    '''
+    Returns a randomly mutated deepcopy of dictionary.
+    '''
     d = deepcopy(d_in)
     for k in d.keys():
         if random() < 0.5:
@@ -26,6 +32,17 @@ def mutate(d_in):
     return d
 
 if __name__ == '__main__':
+    '''
+    Performs endless genetic trials. 8 agents play off against each other. Their
+    behavioural data is stored in genes.json, and updated after each trial as
+    follows:
+
+    - top 3 agents' data survive
+    - 4 is child of top 1 and 2
+    - 5 is child of top 1 and 3
+    - 6, 7 are mutations of top 1
+    - 8 is mutation of 2
+    '''
 
     num_games  = 7500
     
@@ -36,16 +53,18 @@ if __name__ == '__main__':
         with open('genes.json') as f: genes = json.load(f)
         
         agents = [Evolver(data, name) for name, data in genes.items()]
-        agents += [Bayes3(), Baseline(), Random()]
+        agents += [Bayes3(), Baseline(), RandomAgent()] # other agents added for control
 
+        print("Trial "+str(t))
+        t+=1
+        
         win_rates = run(num_games, agents, False)
         win_rates.pop('Bayes3')
         win_rates.pop('Baseline')
-        win_rates.pop('Random')
+        win_rates.pop('RandomAgent')
 
         rankings = sorted(win_rates, key=win_rates.get, reverse=True)
-        print(f"Trial {t}: {win_rates}")
-        t+=1
+        print(win_rates)
 
         new_genes = {}
         for i, k in enumerate(genes.keys()):
@@ -56,7 +75,3 @@ if __name__ == '__main__':
             else:        new_genes[k] = mutate(genes[rankings[1]])
 
         with open('genes.json', 'w') as f: json.dump(new_genes, f, indent="")
-
-        
-
-

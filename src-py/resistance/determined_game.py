@@ -1,12 +1,9 @@
 from agent import Agent
-import random
 
-class Game:
+class DeteriminedGame:
     '''
-    A class for maintaining the state of a game of The Resistance.
-    A agent oriented architecture is maintained where the 
-    game has a list of Agents and methods are called on those agents 
-    to share information and get game actions
+    Spies are always the first s agents in agents list.
+    Used for testing.
     '''
 
     def __init__(self, agents):
@@ -27,12 +24,6 @@ class Game:
         self.num_players = len(agents)
         #allocate spies
         self.spies = list(range(Agent.spy_count[self.num_players]))
-        '''
-        while len(self.spies) < Agent.spy_count[self.num_players]:
-            spy = random.randrange(self.num_players)
-            if spy not in self.spies:
-                self.spies.append(spy)
-        '''
         #start game for each agent        
         for agent_id in range(self.num_players):
             spy_list = self.spies.copy() if agent_id in self.spies else []
@@ -149,7 +140,6 @@ class Mission():
         self.rnd = rnd
         self.run()
 
-
     def run(self):    
         '''
         Runs the mission, by asking agents to vote, 
@@ -164,8 +154,6 @@ class Mission():
             success = len(self.fails) < Agent.fails_required[len(self.agents)][self.rnd]
             for a in self.agents:
                 a.mission_outcome(self.team,self.leader_id, len(self.fails), success)
-
-
 
     def __str__(self):
         '''

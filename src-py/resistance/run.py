@@ -28,7 +28,8 @@ class AgentStats():
 
 def run(num_games, agents, verbose=True):
     '''
-    Simulates s random games between the agents specified in agents and prints results
+    Simulates randomised games between agents
+    Returns a dictionary mapping the agents' name to their win rate 
     '''
     t = time.time()
 
@@ -61,22 +62,19 @@ def run(num_games, agents, verbose=True):
     return {a.name: a.win_rate() for a in agent_stats}
 
 if __name__ == "__main__":
-    from random_agent import Random
+    from random_agent import RandomAgent
     from baseline import Baseline
     from bayes import Bayes
     from bayes2 import Bayes2
     from bayes3 import Bayes3
     from evolver import Evolver
-    from evolver_final import Evolved
+    from evolved import Evolved
     import json
     import os
     p = os.path.dirname(__file__)
 
     genes = None
     with open(os.path.join(p, 'genes.json')) as f: genes = json.load(f)['Ev7']
-
-    jordan = None
-    with open(os.path.join(p, 'genes_jordan.json')) as f: jordan = json.load(f)['Ev0']
 
     genes250 = None
     with open(os.path.join(p, 'genes_250.json')) as f: genes250 = json.load(f)['Ev0']
@@ -85,20 +83,19 @@ if __name__ == "__main__":
     with open(os.path.join(p, 'genes_700.json')) as f: genes700 = json.load(f)['Ev0']
 
     num_games = 10000
+    agents    = [Evolved(), Bayes3(), Baseline(), RandomAgent()]
 
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1: # first command line argument is number of games
+        
         try: num_games = int(sys.argv[1])
         except: num_games = 10000
 
-        if len(sys.argv) > 2:
+        if len(sys.argv) > 2: # second argument is genes file to compare
             try:
                 genes_in = None
                 with open(sys.argv[2]) as f: genes_in = json.load(f)
-                run(num_games, [Evolver(data, name) for name, data in genes_in.items()])  
-                exit() 
+                agents = [Evolver(data, name) for name, data in genes_in.items()] 
             except: pass
-
-    agents    = [Evolved(), Bayes3()]
 
     run(num_games, agents)
 

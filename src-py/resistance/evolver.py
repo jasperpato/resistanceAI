@@ -2,32 +2,16 @@ from agent import Agent
 from random import random, sample
 from itertools import combinations
 from math import comb
-
-class Mission:
-    '''
-    Stores game history.
-    A Mission is either: [team proposition + vote]             (aborted)
-    or: [team proposition + vote + outcome]   (carried out)
-    '''
-    def __init__(self, num_players, rnd, proposer, team, votes_for):
-        self.num_players = num_players
-        self.rnd = rnd                  # 0 - 4
-        self.proposer = proposer
-        self.team = team
-        self.votes_for = votes_for
-        self.betrayals = None           # None if no mission carried out
-        self.success = None             # None if no mission carried out, but False
-                                        # if this is the fifth aborted mission
+from mission import Mission
 
 class Evolver(Agent):    
     '''
     Maintains probabilities of all possible worlds.
     Calculates the probabilty of each player being a spy from set of worlds.
-    World probabilities are updated on both vote patterns and mission outcomes.
+    World probabilities are updated on mission outcomes, voting patterns and
+    proposers.
 
-    The probabilities P(event | world) are stored in a JSON file in the form [a, b, c]
-    The probability is derived by: P(event | world) = ax^2 + bx + c
-    where x = missions_failed - missions_succeeded
+    Behavioural data passed in as a dictionary.
     '''    
 
     def __init__(self, data, name='Evolver'):
@@ -131,7 +115,8 @@ class Evolver(Agent):
                 for n in range(1, len(ps)):
                     if not self.enough_spies(team): team = ps[n]
                     else: return team
-        return [self.player_number] + sample([x for x in range(self.num_players) if x != self.player_number], team_size-1)
+        return [self.player_number] + \
+            sample([x for x in range(self.num_players) if x != self.player_number], team_size-1)
 
     def mission_suspicion(self, mission):
         '''
@@ -296,5 +281,3 @@ class Evolver(Agent):
         self.downvotes = 0
     
     def game_outcome(self, spies_win, spies): pass
-
-

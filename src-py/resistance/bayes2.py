@@ -3,22 +3,7 @@ from random import random, sample
 from time import time
 from itertools import combinations
 from math import comb
-
-class Mission:
-    '''
-    Stores game history.
-    A Mission is either: [team proposition + vote]             (aborted)
-    or: [team proposition + vote + outcome]   (carried out)
-    '''
-    def __init__(self, number_of_players, rnd, proposer, team, votes_for):
-        self.number_of_players = number_of_players
-        self.rnd = rnd            # 0 - 4
-        self.proposer = proposer
-        self.team = team
-        self.votes_for = votes_for
-        self.betrayals = None       # None if no mission carried out
-        self.success = None         # None if no mission carried out, but False
-                                    # if this is the fifth aborted mission
+from mission import Mission
 
 class Bayes2(Agent):    
     '''

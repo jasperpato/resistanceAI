@@ -213,12 +213,14 @@ class Mission():
 
 if __name__ == "__main__":
 
-    from human import Human
-    from evolver import Evolver
-    import json
+    from evolved import Evolved
+    from bayes3 import Bayes3
+    from baseline import Baseline
+    from random_agent import RandomAgent
 
-    genes = None
-    with open("genes_jordan.json") as f: genes = json.load(f)['Ev0']
+    l = random.randrange(5,11)
+    agents = [Evolved, Bayes3, Baseline, RandomAgent]
 
-    g = Game([Evolver(genes) for i in range(7)])
+    g = Game([random.choice(agents)(str(i)) for i in range(l)])
     g.play()
+    print(str(g))

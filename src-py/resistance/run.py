@@ -74,16 +74,24 @@ if __name__ == "__main__":
     num_games = 10000
     agents    = [Evolved(), Bayes3(), Baseline(), RandomAgent()]
 
-    if len(sys.argv) > 1: # first command line argument is number of games (optional)
+    if len(sys.argv) > 1:
         
         try: num_games = int(sys.argv[1])
         except: num_games = 10000
 
-        if len(sys.argv) > 2: # second argument is genes file to compare (optional)
+        if sys.argv[1] == 'compare':
+            genes = None
+            with open('genes.json') as f: genes = json.load(f)['Ev0']
+            agents = [Evolver(genes), Bayes3(), Baseline(), RandomAgent()]
+        else:
             try:
-                genes_in = None
-                with open(sys.argv[2]) as f: genes_in = json.load(f)
-                agents = [Evolver(data, name) for name, data in genes_in.items()] 
+                genes = None
+                with open(sys.argv[1]) as f: genes = json.load(f)
+                agents = [Evolver(data, name) for name, data in genes.items()] 
             except: pass
+        
+        if len(sys.argv) > 2:
+            try: num_games = int(sys.argv[2])
+            except: num_games = 10000
 
     run(num_games, agents)

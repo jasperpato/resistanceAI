@@ -4,9 +4,13 @@ Bayes3 is hard-coded with our best estimates of behavioural patterns. Evolved is
 hard-coded with values that were achieved through 900 genetic trails of 7500
 games each (6,750,000 games). See genes.json for a list of the trait values.
 
-To view the results from 10,000 games between Bayes3, Evolved, as well as our
+To view the results from n games between Bayes3, Evolved, as well as our
 Baseline and Random agents:
-> py run.py
+> py run.py n
+
+To view the results from the current Evolver agent (genes taken from the latest
+genes.json) against the other agents:
+> py run.py compare n
 
 To perform more genetic trials on the data stored in genes.json:
 > py genetics.py

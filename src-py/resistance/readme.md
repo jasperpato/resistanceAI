@@ -1,5 +1,4 @@
-Our two final Resistance agents are Bayes3 and Evolved. They are Bayesian agents
-whose only difference is parameters.
+Our two final Resistance agents are the Bayesian agents Bayes3 and Evolved.
 
 Bayes3 is hard-coded with our best estimates of behavioural patterns. Evolved is
 hard-coded with values that were achieved through 900 genetic trails of 7500

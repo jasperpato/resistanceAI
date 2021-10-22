@@ -70,27 +70,16 @@ if __name__ == "__main__":
     from evolver import Evolver
     from evolved import Evolved
     import json
-    import os
-    p = os.path.dirname(__file__)
-
-    genes = None
-    with open(os.path.join(p, 'genes.json')) as f: genes = json.load(f)['Ev7']
-
-    genes250 = None
-    with open(os.path.join(p, 'genes_250.json')) as f: genes250 = json.load(f)['Ev0']
-
-    genes700 = None
-    with open(os.path.join(p, 'genes_700.json')) as f: genes700 = json.load(f)['Ev0']
 
     num_games = 10000
     agents    = [Evolved(), Bayes3(), Baseline(), RandomAgent()]
 
-    if len(sys.argv) > 1: # first command line argument is number of games
+    if len(sys.argv) > 1: # first command line argument is number of games (optional)
         
         try: num_games = int(sys.argv[1])
         except: num_games = 10000
 
-        if len(sys.argv) > 2: # second argument is genes file to compare
+        if len(sys.argv) > 2: # second argument is genes file to compare (optional)
             try:
                 genes_in = None
                 with open(sys.argv[2]) as f: genes_in = json.load(f)
@@ -98,5 +87,3 @@ if __name__ == "__main__":
             except: pass
 
     run(num_games, agents)
-
-

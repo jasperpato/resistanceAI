@@ -23,9 +23,15 @@ class Evolver(Agent):
         self.data['proposer_weight'] = [0,0,0,0.3]
 
     def calc_threshold(self, vec):
+        '''
+        Converts a 4D vector into an unbounded threshold value
+        '''
         return vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]
 
     def calc_rate(self, vec):
+        '''
+        Converts a 4D vector into a probability between 0.01 and 0.99
+        '''
         return min(0.99, max(0.01, vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]))
 
     def is_spy(self): return self.spies != []
@@ -38,7 +44,7 @@ class Evolver(Agent):
 
     def new_game(self, num_players, player_number, spies):
         '''
-        initialises the game, spies is empty if player is not a spy
+        Initialises the game, spies is empty if player is not a spy
         '''
         self.rnd       = 0
         self.successes = 0
@@ -61,8 +67,7 @@ class Evolver(Agent):
         Returns list of all possible teams of length l including self,
         in ascending average suspicion
         '''
-        teams = [t for t in list(combinations(range(self.num_players), l))
-                 if self.player_number in t]
+        teams = [t for t in list(combinations(range(self.num_players), l)) if self.player_number in t]
         return sorted(teams, key=lambda t: sum([self.suspicions[x] for x in t]))
 
     def num_spies_in(self, mission):
@@ -145,8 +150,7 @@ class Evolver(Agent):
         Add a new Mission object to our stored info
         '''
         self.missions.append(Mission(self.num_players, self.rnd, proposer, mission, votes))
-        if 2 * len(votes) <= self.num_players:
-            self.downvotes += 1
+        if 2 * len(votes) <= self.num_players: self.downvotes += 1
 
     def betray(self, mission, proposer):
         if self.is_spy():

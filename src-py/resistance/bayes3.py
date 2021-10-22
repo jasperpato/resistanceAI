@@ -299,5 +299,3 @@ class Bayes3(Agent):
         self.downvotes = 0
     
     def game_outcome(self, spies_win, spies): pass
-
-

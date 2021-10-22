@@ -71,8 +71,8 @@ if __name__ == "__main__":
     from evolved import Evolved
     import json
 
-    num_games = 10000
-    agents    = [Evolved(), Bayes3(), Baseline(), RandomAgent()]
+    num_games = 100000
+    agents    = [Evolved(), Bayes3()] #, Baseline(), RandomAgent()]
 
     if len(sys.argv) > 1:
         

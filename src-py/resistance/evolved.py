@@ -36,9 +36,15 @@ class Evolved(Agent):
         }
 
     def calc_threshold(self, vec):
+        '''
+        Converts a 4D vector into an unbounded threshold value
+        '''
         return vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]
 
     def calc_rate(self, vec):
+        '''
+        Converts a 4D vector into a probability between 0.01 and 0.99
+        '''
         return min(0.99, max(0.01, vec[0]*self.rnd*self.rnd + vec[1]*self.rnd + vec[2]*self.fails + vec[3]))
 
     def is_spy(self): return self.spies != []
@@ -74,8 +80,7 @@ class Evolved(Agent):
         Returns list of all possible teams of length l including self,
         in ascending average suspicion
         '''
-        teams = [t for t in list(combinations(range(self.num_players), l))
-                 if self.player_number in t]
+        teams = [t for t in list(combinations(range(self.num_players), l)) if self.player_number in t]
         return sorted(teams, key=lambda t: sum([self.suspicions[x] for x in t]))
 
     def num_spies_in(self, mission):

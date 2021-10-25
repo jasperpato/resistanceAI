@@ -73,8 +73,8 @@ if __name__ == "__main__":
     from monte_low_bf import MonteLow
     import json
 
-    num_games = 500
-    agents    = [Evolved(), Bayes3(), MonteLow(), MonteHigh(), RandomAgent()]
+    num_games = 100000
+    agents    = [Evolved(), Bayes3() , Baseline(), RandomAgent()]
 
     if len(sys.argv) > 1:
         

@@ -25,10 +25,10 @@ def mutate(d_in):
     '''
     d = deepcopy(d_in)
     for k in d.keys():
-        if random() < 0.5:
-            for n in range(len(d[k])):
-                if random() < 0.5:
-                    d[k][n] = round(d[k][n] + randrange(-5, 6) / 100, 2)
+        if k == "outcome_weight" or k == "vote_weight" or k == "proposer_weight": continue
+        for n in range(len(d[k])):
+            if random() < 0.25:
+                d[k][n] = round(d[k][n] + randrange(-5, 6) / 100, 2)
     return d
 
 if __name__ == '__main__':

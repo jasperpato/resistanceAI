@@ -138,13 +138,14 @@ class Bayes(Agent):
     def vote(self, mission, proposer):
         if self.rnd() == 1 or proposer == self.player_number or self.missions_downvoted() == 4:
             return True
+        res_vote = self.mission_suspicion(mission) <= self.vote_threshold * self.average_suspicion()
         if self.is_spy():
             if self.missions_succeeded() == 2:
                 return True if self.enough_spies(mission) else False
             if self.enough_spies(mission) and not self.bad_mission(mission):
-                return random() < self.vote_failable_rate * self.rnd()
+                return res_vote or random() < self.vote_failable_rate * self.rnd()
         if self.bad_mission(mission): return False
-        return self.mission_suspicion(mission) <= self.vote_threshold * self.average_suspicion()
+        return res_vote
 
     def vote_outcome(self, mission, proposer, votes):
         '''

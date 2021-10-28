@@ -68,19 +68,29 @@ if __name__ == "__main__":
     from bayes2 import Bayes2
     from bayes3 import Bayes3
     from evolver import Evolver
-    from evolved import Evolved
-    from monte_high_bf import MonteHigh
-    from monte_low_bf import MonteLow
     import json
 
-    num_games = 100000
-    agents    = [Evolved(), Bayes3() , Baseline(), RandomAgent()]
+    genes0 = None
+    with open('genes0.json') as f: genes0 = json.load(f)
+
+    genes700 = None
+    with open('genes700.json') as f: genes700 = json.load(f)
+
+    genes900 = None
+    with open('genes700.json') as f: genes900 = json.load(f)
+
+    genes1150 = None
+    with open('genes700.json') as f: genes1150 = json.load(f)
+
+    num_games = 10000
+    agents    = [Evolver(genes0, "Evolver0"),
+                 Evolver(genes700, "Evolver700"),
+                 Evolver(genes900, "Evolver900"),
+                 Evolver(genes1150, "Evolver1150")]
 
     if len(sys.argv) > 1:
-        
         try: num_games = int(sys.argv[1])
         except: num_games = 10000
-
         if sys.argv[1] == 'compare':
             genes = None
             with open('genes.json') as f: genes = json.load(f)['Ev0']
@@ -91,7 +101,6 @@ if __name__ == "__main__":
                 with open(sys.argv[1]) as f: genes = json.load(f)
                 agents = [Evolver(data, name) for name, data in genes.items()] 
             except: pass
-        
         if len(sys.argv) > 2:
             try: num_games = int(sys.argv[2])
             except: num_games = 10000

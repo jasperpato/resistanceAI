@@ -1,7 +1,7 @@
 {
     "outcome_weight":          [ 0.00, 0.00, 0.00, 1.00],
-    "vote_weight":             [ 0.00, 0.00, 0.00 ,0.40],
-    "proposer_weight":         [ 0.00, 0.00, 0.00 ,0.30],
+    "vote_weight":             [ 0.05, 0.00, 0.00 ,0.10],
+    "proposer_weight":         [ 0.00, 0.00, 0.05 ,0.10],
     "vote_threshold":          [ 0.04,-0.15,-0.17, 0.65],
     "failable_vote_threshold": [ 0.43, 0.29, 0.59, 0.90],
     "betray_rate":             [ 0.11, 0.38,-0.14, 0.71],

@@ -77,15 +77,15 @@ if __name__ == "__main__":
     with open('genes700.json') as f: genes700 = json.load(f)
 
     genes900 = None
-    with open('genes700.json') as f: genes900 = json.load(f)
+    with open('genes_weights.json') as f: genes_weights = json.load(f)['Ev0']
 
     genes1150 = None
-    with open('genes700.json') as f: genes1150 = json.load(f)
+    with open('genes1150.json') as f: genes1150 = json.load(f)
 
-    num_games = 10000
-    agents    = [Evolver(genes0, "Evolver0"),
-                 Evolver(genes700, "Evolver700"),
-                 Evolver(genes900, "Evolver900"),
+    num_games = 100000
+    agents    = [Baseline(),
+                 Bayes3(),
+                 Evolver(genes_weights, "EvolverWeights"),
                  Evolver(genes1150, "Evolver1150")]
 
     if len(sys.argv) > 1:

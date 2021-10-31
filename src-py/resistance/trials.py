@@ -21,14 +21,13 @@ def child(d1, d2):
 
 def mutate(d_in):
     '''
-    Returns a randomly mutated deepcopy of dictionary.
+    Returns a randomly mutated deepcopy of input dictionary.
     '''
     d = deepcopy(d_in)
     for k in d.keys():
-        if k == "outcome_weight" or k == "vote_weight" or k == "proposer_weight": continue
+        # if k in ['outcome_weight', 'vote_weight', 'proposer_weight']: continue
         for n in range(len(d[k])):
-            if random() < 0.25:
-                d[k][n] = round(d[k][n] + randrange(-5, 6) / 100, 2)
+            if random() < 0.25: d[k][n] = round(d[k][n] + randrange(-5, 6) / 100, 2)
     return d
 
 if __name__ == '__main__':
@@ -55,7 +54,7 @@ if __name__ == '__main__':
         agents = [Evolver(data, name) for name, data in genes.items()]
         agents += [Bayes3(), Baseline(), RandomAgent()] # other agents added for control
 
-        print("Trial "+str(t))
+        print('Trial '+str(t))
         t+=1
         
         win_rates = run(num_games, agents, False)
@@ -74,4 +73,4 @@ if __name__ == '__main__':
             elif i < 7:  new_genes[k] = mutate(genes[rankings[0]])
             else:        new_genes[k] = mutate(genes[rankings[1]])
 
-        with open('genes.json', 'w') as f: json.dump(new_genes, f, indent="")
+        with open('genes.json', 'w') as f: json.dump(new_genes, f, indent='')
